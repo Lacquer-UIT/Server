@@ -14,7 +14,7 @@ var randomRouter = require('./routes/search');
 var app = express();
 app.listen(process.env.PORT || 3000);
 
-mongoose.connect(process.env.MONGO_URI, { dbName: "Dictionary-Eng-Vie" }) 
+mongoose.connect(process.env.MONGO_URI, { dbName: "dictionaryDB" }) 
 .then(() => {
   console.log('Connected to the database');
 })

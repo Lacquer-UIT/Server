@@ -28,7 +28,7 @@ const DictionaryEntrySchema = new Schema(
     pronunciations: { type: [String], default: [] },
     meanings: { type: [MeaningSchema], required: true },
   },
-  { collection: "EnglishWords" } // ✅ Ensure it connects to the correct collection
+  { collection: "Eng-Vie" }
 );
 
 const Dictionary = mongoose.model("Dictionary", DictionaryEntrySchema);

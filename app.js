@@ -9,7 +9,7 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var searchRouter = require('./routes/search');
-var randomRouter = require('./routes/search');
+var randomRouter = require('./routes/random');
 
 var app = express();
 app.listen(process.env.PORT || 3000);

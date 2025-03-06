@@ -21,7 +21,7 @@ const MeaningSchema = new Schema({
   definitions: { type: [DefinitionSchema], required: true },
 });
 
-// ✅ Main dictionary schema
+// Main dictionary schema
 const DictionaryEntrySchema = new Schema(
   {
     word: { type: String, required: true, index: true },

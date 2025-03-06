@@ -6,11 +6,13 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 require("dotenv").config();
 
+
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var searchRouter = require("./routes/search");
 var randomRouter = require("./routes/random");
 var chatbotRouter = require("./routes/chatbot");
+var translateRouter = require('./routes/translate');
 
 var app = express();
 app.listen(process.env.PORT || 3000);
@@ -35,10 +37,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/search", searchRouter);
-app.use("/random", randomRouter);
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/search', searchRouter);
+app.use('/random', randomRouter);
+app.use('/translate', translateRouter);
 app.use("/chatbot", chatbotRouter);
 
 // catch 404 and forward to error handler

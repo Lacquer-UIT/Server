@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var searchRouter = require('./routes/search');
 var randomRouter = require('./routes/random');
 var translateRouter = require('./routes/translate');
+var authRouter = require('./routes/auth');
 
 var app = express();
 app.listen(process.env.PORT || 3000);
@@ -39,6 +40,7 @@ app.use('/users', usersRouter);
 app.use('/search', searchRouter);
 app.use('/random', randomRouter);
 app.use('/translate', translateRouter);
+app.use('/auth', authRouter);
 
 
 // catch 404 and forward to error handler

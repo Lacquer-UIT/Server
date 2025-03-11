@@ -9,8 +9,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 const userprompt = "Respond in pure text and concise manner. ";
 
 router.post("/", async (req, res) => {
-  const prompt = "Explain how AI works. " + userprompt;
-  // const prompt = req.body.prompt + userprompt; --> Use this line if you want to use the prompt from the request body
+  const prompt = req.body.prompt + userprompt;
   try {
     const result = await model.generateContent(prompt);
     console.log(result); // Log the entire response object

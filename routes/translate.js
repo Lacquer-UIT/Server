@@ -1,5 +1,5 @@
 const express = require("express");
-const { translateToVietnamese } = require("../huggingface/transformer").default;
+const { translateToVietnamese } = require("../huggingface/transformer");
 
 const router = express.Router();
 

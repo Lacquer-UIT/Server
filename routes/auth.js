@@ -13,6 +13,7 @@ const {
     updateUserProfile,
     deleteUser,
     verifyEmail,
+    resendVerificationEmail,
   } = require("../controller/user");
   const authMiddleware = require("../middleware/auth");
 
@@ -20,6 +21,7 @@ const {
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/verify", verifyEmail);
+router.post("/resend", resendVerificationEmail)
 
 // Protected routes (require JWT token)
 router.get("/profile", authMiddleware, getUserProfile);

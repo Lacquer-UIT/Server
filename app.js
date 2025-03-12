@@ -14,6 +14,7 @@ var randomRouter = require("./routes/random");
 var chatbotRouter = require("./routes/chatbot");
 var translateRouter = require('./routes/translate');
 var authRouter = require('./routes/auth');
+var chatbotRouter = require("./routes/chatbot");
 
 var app = express();
 app.listen(process.env.PORT || 3000);
@@ -45,7 +46,7 @@ app.use('/random', randomRouter);
 app.use('/translate', translateRouter);
 app.use("/chatbot", chatbotRouter);
 app.use('/auth', authRouter);
-
+app.use("/chatbot", chatbotRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -211,6 +211,82 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+// Forgot Password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Generate reset token (valid for 15 minutes)
+    const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "15m" });
+
+    const resetLink = `${BASE_URL}reset?token=${resetToken}`;
+    
+    await transporter.sendMail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
+          <div style="max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+            <h2 style="color: #333; margin-bottom: 10px;">Reset Your Password</h2>
+            <p style="color: #555; font-size: 16px;">Click the link below to reset your password:</p>
+            <p style="font-size: 16px; word-wrap: break-word;">
+              <a href="${resetLink}" style="color: #007bff; text-decoration: underline;">
+                ${resetLink}
+              </a>
+            </p>
+            <p style="color: #777; margin-top: 20px; font-size: 14px;">Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-word; font-size: 14px; color: #555;">${resetLink}</p>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+            <p style="color: #888; font-size: 12px;">This link is valid for 15 minutes.</p>
+            <p style="color: #888; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.validateResetToken = async (req, res) => {
+  try {
+    const { token } = req.query;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ message: "Token is valid", userId: decoded.userId });
+  } catch (error) {
+    res.status(400).json({ message: "Invalid or expired token" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) return res.status(400).json({ message: "Invalid token or user not found" });
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    
+    await user.save();
+    
+    res.json({ message: "Password has been reset. You can now log in." });
+  } catch (error) {
+    res.status(400).json({ message: "Invalid or expired token" });
+  }
+};
+
 passport.use(
   new GoogleStrategy(
     {
@@ -270,7 +346,7 @@ done(null, user);
 const sendVerificationEmail = async (user) => {
   if (!user?.email || !user?.verificationToken) return;
 
-  const verificationLink = `${BASE_URL}/verify?token=${user.verificationToken}`;
+  const verificationLink = `${BASE_URL}verify?token=${user.verificationToken}`;
 
   await transporter.sendMail({
     to: user.email,
@@ -279,13 +355,12 @@ const sendVerificationEmail = async (user) => {
       <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
         <div style="max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
           <h2 style="color: #333; margin-bottom: 10px;">Verify Your Email</h2>
-          <p style="color: #555; font-size: 16px;">Click the button below to verify your email address:</p>
-          <a href="${verificationLink}" 
-             style="display: inline-block; padding: 12px 20px; font-size: 16px; font-weight: bold;
-                    color: #fff; background-color: #007bff; text-decoration: none; 
-                    border-radius: 5px; margin-top: 10px;">
-            Verify Email
-          </a>
+          <p style="color: #555; font-size: 16px;">Click the link below to verify your email:</p>
+          <p style="font-size: 16px; word-wrap: break-word;">
+            <a href="${verificationLink}" style="color: #007bff; text-decoration: underline;">
+              ${verificationLink}
+            </a>
+          </p>
           <p style="color: #777; margin-top: 20px; font-size: 14px;">Or copy and paste this link into your browser:</p>
           <p style="word-break: break-word; font-size: 14px; color: #555;">${verificationLink}</p>
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">

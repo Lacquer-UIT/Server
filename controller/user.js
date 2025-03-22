@@ -191,13 +191,15 @@ exports.resendVerificationEmail = async (req, res) => {
 // Verify Email
 exports.verifyEmail = async (req, res) => {
   try {
-    const { token } = req.query;
+    const { token } = req.body;
+    console.log(token);
 
     const user = await User.findOne({ verificationToken: token });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
+    console.log(user);
 
     user.isVerified = true;
     user.verificationToken = null; // Clear token after verification
@@ -266,25 +268,29 @@ done(null, user);
 
 
 const sendVerificationEmail = async (user) => {
-  if (!user || !user.email || !user.verificationToken) return;
+  if (!user?.email || !user?.verificationToken) return;
 
-  const verificationLink = `${BASE_URL}/auth/verify?token=${user.verificationToken}`;
+  const verificationLink = `${BASE_URL}/verify?token=${user.verificationToken}`;
 
   await transporter.sendMail({
     to: user.email,
     subject: "Verify Your Email",
     html: `
-      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-        <h2 style="color: #333;">Verify Your Email</h2>
-        <p style="color: #555;">Click the button below to verify your email address:</p>
-        <a href="${verificationLink}" 
-           style="display: inline-block; padding: 10px 20px; font-size: 16px; 
-                  color: #fff; background-color: #007bff; text-decoration: none; 
-                  border-radius: 5px;">
-          Verify Email
-        </a>
-        <p style="color: #777; margin-top: 20px;">Or copy and paste this link in your browser:</p>
-        <p style="word-break: break-all;">${verificationLink}</p>
+      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
+        <div style="max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #333; margin-bottom: 10px;">Verify Your Email</h2>
+          <p style="color: #555; font-size: 16px;">Click the button below to verify your email address:</p>
+          <a href="${verificationLink}" 
+             style="display: inline-block; padding: 12px 20px; font-size: 16px; font-weight: bold;
+                    color: #fff; background-color: #007bff; text-decoration: none; 
+                    border-radius: 5px; margin-top: 10px;">
+            Verify Email
+          </a>
+          <p style="color: #777; margin-top: 20px; font-size: 14px;">Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-word; font-size: 14px; color: #555;">${verificationLink}</p>
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+          <p style="color: #888; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+        </div>
       </div>
     `,
   });

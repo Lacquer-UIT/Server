@@ -2,10 +2,6 @@
 
 ### Dev
 ```
+npm install
 npm run devStart
-```
-
-### Frontend
-```
-docker-compose up --build
 ```

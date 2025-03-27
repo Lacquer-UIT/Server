@@ -6,10 +6,12 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 require("dotenv").config();
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var searchRouter = require('./routes/search');
-var randomRouter = require('./routes/random');
+
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var searchRouter = require("./routes/search");
+var randomRouter = require("./routes/random");
+var chatbotRouter = require("./routes/chatbot");
 var translateRouter = require('./routes/translate');
 var authRouter = require('./routes/auth');
 var chatbotRouter = require("./routes/chatbot");
@@ -35,13 +37,14 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/search', searchRouter);
 app.use('/random', randomRouter);
 app.use('/translate', translateRouter);
+app.use("/chatbot", chatbotRouter);
 app.use('/auth', authRouter);
 app.use("/chatbot", chatbotRouter);
 

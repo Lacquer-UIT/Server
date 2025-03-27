@@ -1,10 +1,8 @@
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const env = require('dotenv').config();
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const express = require('express');
 const router = express.Router();
+require("dotenv").config();
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 
 const {
     registerUser,
@@ -14,32 +12,51 @@ const {
     deleteUser,
     verifyEmail,
     resendVerificationEmail,
+    resetPassword,
+    forgotPassword,
   } = require("../controller/user");
   const authMiddleware = require("../middleware/auth");
 
 // Public routes
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/verify", verifyEmail);
-router.post("/resend", resendVerificationEmail)
+router.post("/verify", verifyEmail);
+router.post("/resend", resendVerificationEmail);
+router.post("/reset", resetPassword);
+router.post("/forgot", forgotPassword);
 
 // Protected routes (require JWT token)
 router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile", authMiddleware, updateUserProfile);
 router.delete("/delete", authMiddleware, deleteUser);
 
-passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/callback",
-    passReqToCallback: true
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return cb(err, user);
+
+// Google OAuth route
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+// Callback route
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    if (!req.user) return res.status(401).json({ message: "Authentication failed" });
+
+    // Send JWT token back to mobile app
+    res.json({
+      message: "Authentication successful",
+      user: req.user.user,
+      token: req.user.token,
     });
   }
-));
+);
+
+// Logout route
+router.get("/auth/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) return res.status(500).json({ error: "Logout failed" });
+    res.redirect("/");
+  });
+});
 
 
 module.exports = router;

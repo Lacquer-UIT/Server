@@ -14,7 +14,6 @@ var randomRouter = require("./routes/random");
 var chatbotRouter = require("./routes/chatbot");
 var translateRouter = require('./routes/translate');
 var authRouter = require('./routes/auth');
-var chatbotRouter = require("./routes/chatbot");
 
 var app = express();
 app.listen(process.env.PORT || 3000);

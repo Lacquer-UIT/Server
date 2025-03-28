@@ -7,6 +7,7 @@ var mongoose = require("mongoose");
 require("dotenv").config();
 
 
+
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var searchRouter = require("./routes/search");
@@ -17,6 +18,19 @@ var authRouter = require('./routes/auth');
 
 var app = express();
 app.listen(process.env.PORT || 3000);
+
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
+
+app.route('/test')
+  .get((req, res) => {
+    res.json({ message: "GET request to /test is working!" });
+  })
+  .post((req, res) => {
+    res.json({ message: "POST request to /test received!", data: req.body });
+  });
 
 mongoose
   .connect(process.env.MONGO_URI, { dbName: "dictionaryDB" })
@@ -47,13 +61,6 @@ app.use("/chatbot", chatbotRouter);
 app.use('/auth', authRouter);
 app.use("/chatbot", chatbotRouter);
 
-app.route('/test')
-  .get((req, res) => {
-    res.json({ message: "GET request to /test is working!" });
-  })
-  .post((req, res) => {
-    res.json({ message: "POST request to /test received!", data: req.body });
-  });
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

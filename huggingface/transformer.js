@@ -1,4 +1,3 @@
-const { pipeline } = require('@xenova/transformers');
 
 let translator = null;
 let loadingPromise = null;
@@ -6,6 +5,7 @@ let loadingPromise = null;
 // Load the model once and reuse it
 async function loadModel() {
     if (!loadingPromise) {
+        const { pipeline } = await import('@xenova/transformers');
         loadingPromise = pipeline('translation', 'Xenova/nllb-200-distilled-600M')
             .then(model => {
                 translator = model;

@@ -191,15 +191,17 @@ exports.resendVerificationEmail = async (req, res) => {
 // Verify Email
 exports.verifyEmail = async (req, res) => {
   try {
-    const { token } = req.body;
-    console.log(token);
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "Missing token" });
+    }
 
     const user = await User.findOne({ verificationToken: token });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
-    console.log(user);
 
     user.isVerified = true;
     user.verificationToken = null; // Clear token after verification
@@ -224,7 +226,7 @@ exports.forgotPassword = async (req, res) => {
     // Generate reset token (valid for 15 minutes)
     const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "15m" });
 
-    const resetLink = `${BASE_URL}reset?token=${resetToken}`;
+    const resetLink = `${BASE_URL}/redirect/reset?token=${resetToken}`;
     
     await transporter.sendMail({
       to: user.email,
@@ -267,13 +269,23 @@ exports.validateResetToken = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
+    const { token, newPassword } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "Missing token" });
+    }
+
+    if (!newPassword) {
+      return res.redirect(`lacquer://reset?token=${encodeURIComponent(token)}`);
+    }
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.userId);
 
-    if (!user) return res.status(400).json({ message: "Invalid token or user not found" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid token or user not found" });
+    }
 
     // Hash new password
     const salt = await bcrypt.genSalt(10);
@@ -346,7 +358,7 @@ done(null, user);
 const sendVerificationEmail = async (user) => {
   if (!user?.email || !user?.verificationToken) return;
 
-  const verificationLink = `${BASE_URL}verify?token=${user.verificationToken}`;
+  const verificationLink = `${BASE_URL}/redirect/verify?token=${user.verificationToken}`;
 
   await transporter.sendMail({
     to: user.email,

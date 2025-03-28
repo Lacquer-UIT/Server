@@ -47,6 +47,14 @@ app.use("/chatbot", chatbotRouter);
 app.use('/auth', authRouter);
 app.use("/chatbot", chatbotRouter);
 
+app.route('/test')
+  .get((req, res) => {
+    res.json({ message: "GET request to /test is working!" });
+  })
+  .post((req, res) => {
+    res.json({ message: "POST request to /test received!", data: req.body });
+  });
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

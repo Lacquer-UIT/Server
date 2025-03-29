@@ -5,7 +5,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
 require("dotenv").config();
-
+const cors = require('cors');
 
 
 var indexRouter = require("./routes/index");
@@ -20,7 +20,11 @@ var deckRouter = require("./routes/deck");
 const deck = require("./models/deck");
 
 var app = express();
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+app.use(cors({ origin: '*' })); // Allow all origins
 
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);

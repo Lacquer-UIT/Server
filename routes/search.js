@@ -29,4 +29,16 @@ router.get("/", async (req, res) => {
     }
   });
 
+router.get("/suggest", async(req,res) =>{
+  try{
+    const query = req.query.q;
+    if (!query) return res.json([]); // Return empty if no query
+    const suggestions = await Dictionary.find({ word: new RegExp("^" + query, "i") }) // Case-insensitive prefix match
+    .limit(5);
+    res.json(suggestions.map((w) => w.word));
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

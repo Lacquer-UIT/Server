@@ -61,6 +61,7 @@ exports.registerUser = async (req, res) => {
       authProvider,
       googleId: authProvider === "google" ? googleId : null,
       verificationToken,
+      avatar,
       isVerified: authProvider === "google", // Google users are auto-verified
     });
 

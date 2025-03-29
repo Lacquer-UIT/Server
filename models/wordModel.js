@@ -26,6 +26,7 @@ const DictionaryEntrySchema = new Schema(
   {
     word: { type: String, required: true, index: true },
     pronunciations: { type: [String], default: [] },
+    img:{type:[String], default: []},
     meanings: { type: [MeaningSchema], required: true },
   },
   { collection: "Eng-Vie" }

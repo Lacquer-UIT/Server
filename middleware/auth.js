@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
+const response = require("../dto");
 
 const authMiddleware = (req, res, next) => {
   // Get the Authorization header
@@ -7,7 +8,7 @@ const authMiddleware = (req, res, next) => {
 
   // Check if the header exists
   if (!authHeader) {
-    return res.status(401).json({ message: "Access denied. No token provided." });
+    return res.status(401).json(response(false, "Access Denied, No Token provided"));
   }
 
   // Extract the token by splitting on the space and taking the second part
@@ -16,7 +17,7 @@ const authMiddleware = (req, res, next) => {
 
   // Verify the token exists and is not empty
   if (!token) {
-    return res.status(401).json({ message: "Access denied. Invalid token format." });
+    return res.status(401).json(response(false, "Invalid Token"));
   }
 
   try {
@@ -25,7 +26,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded; // Attach user data to request
     next();
   } catch (error) {
-    res.status(400).json({ message: "Invalid token" });
+    return res.status(400).json(response(false, "Invalid Token"));
   }
 };
 

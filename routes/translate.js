@@ -1,5 +1,6 @@
 const express = require("express");
 const { translateToVietnamese } = require("../huggingface/transformer");
+const response = require("../dto");
 
 const router = express.Router();
 
@@ -7,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     const query = req.query.englishText;
     if (!query) {
-      return res.status(400).send({ error: "Missing englishText parameter" });
+      return res.status(400).json(response(false, "Missing 'englishText' parameter"));
     }
 
     console.log(`Received request: ${query}`);
@@ -36,10 +37,10 @@ router.get("/", async (req, res) => {
     }
 
     console.log(`Translation success: ${vietnameseText}`);
-    res.send(vietnameseText);
+    res.json(response(true, "Translation successful", vietnameseText));
   } catch (error) {
     console.error("Server Error:", error);
-    res.status(500).send({ error: "Translation failed" });
+    res.status(500).json(response(false, "Translation failed"));
   }
 });
 

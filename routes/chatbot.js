@@ -1,4 +1,5 @@
 const express = require("express");
+const response = require("../dto");
 
 const router = express.Router();
 
@@ -18,13 +19,13 @@ router.post("/", async (req, res) => {
       result.response.candidates &&
       result.response.candidates.length > 0
     ) {
-      res.json({ result: result.response.candidates[0].content.parts[0].text });
+      res.json(response(true, "Query Accepted",result.response.candidates[0].content.parts[0].text ));
     } else {
-      res.status(500).json({ error: "No response from Gemini API" });
+      res.status(500).json(response(false, "Ai Error"));
     }
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    res.status(500).json({ error: "Internal server error " + error });
+    res.status(500).json(response(false, error.message));
   }
 });
 

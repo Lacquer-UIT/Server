@@ -27,32 +27,32 @@ router.put("/profile", authMiddleware, updateUserProfile);
 router.delete("/delete", authMiddleware, deleteUser);
 
 
-// Google OAuth route
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+// // Google OAuth route
+// router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-// Callback route
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false }),
-  (req, res) => {
-    if (!req.user) return res.status(401).json({ message: "Authentication failed" });
+// // Callback route
+// router.get(
+//   "/google/callback",
+//   passport.authenticate("google", { session: false }),
+//   (req, res) => {
+//     if (!req.user) return res.status(401).json({ message: "Authentication failed" });
 
-    // Send JWT token back to mobile app
-    res.json({
-      message: "Authentication successful",
-      user: req.user.user,
-      token: req.user.token,
-    });
-  }
-);
+//     // Send JWT token back to mobile app
+//     res.json({
+//       message: "Authentication successful",
+//       user: req.user.user,
+//       token: req.user.token,
+//     });
+//   }
+// );
 
-// Logout route
-router.get("/auth/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) return res.status(500).json({ error: "Logout failed" });
-    res.redirect("/");
-  });
-});
+// // Logout route
+// router.get("/auth/logout", (req, res) => {
+//   req.logout((err) => {
+//     if (err) return res.status(500).json({ error: "Logout failed" });
+//     res.redirect("/");
+//   });
+// });
 
 
 module.exports = router;

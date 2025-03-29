@@ -6,6 +6,8 @@ const crypto = require("crypto");
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const env = require('dotenv').config();
+const response = require("../dto");
+
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -34,14 +36,14 @@ exports.registerUser = async (req, res) => {
     let user = await User.findOne({ email });
     if (user) {
       console.log("⚠️ Email already exists:", email);
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json(response(false,"Email existed"));
     }
 
     let passwordHash = null;
     if (authProvider === "local") {
       if (!password) {
         console.log("⚠️ Password is missing for local auth.");
-        return res.status(400).json({ message: "Password is required" });
+        return res.status(400).json(response(false,"Password missing"));
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -77,10 +79,10 @@ exports.registerUser = async (req, res) => {
     }
 
     console.log("✅ User registered successfully.");
-    res.status(201).json({ message: "User registered successfully. Please verify your email." });
+    res.status(201).json(response(true, "Register successfully, Please check your email for verification"));
   } catch (error) {
     console.error("❌ Error registering user:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 // Login User
@@ -89,29 +91,29 @@ exports.loginUser = async (req, res) => {
     const { email, password, googleId } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json(response(false, "Invalid Credentials"));
 
     // Prevent login if not verified
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email before logging in." });
+      return res.status(403).json(response(false, "Please verify before signing in"));
     }
 
     if (user.authProvider === "local") {
-      if (!password) return res.status(400).json({ message: "Password is required" });
+      if (!password) return res.status(400).json(response, "Please enter password");
 
       const isMatch = await bcrypt.compare(password, user.passwordHash);
-      if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+      if (!isMatch) return res.status(400).json(response(false, "Wrong Password"));
     }
 
     if (user.authProvider === "google" && googleId !== user.googleId) {
-      return res.status(400).json({ message: "Invalid Google authentication" });
+      return res.status(400).json(response(false, "Invalid Google Authentication"));
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
-    res.json({ token, userId: user._id, username: user.username });
+    res.json(response(true, "Login Successfully",{ token, userId: user._id, username: user.username }));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 
@@ -120,11 +122,11 @@ exports.getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-passwordHash");
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json(response(false, "User not found"));
     }
-    res.json(user);
+    res.json(response(true, "User Found!", user));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 
@@ -134,7 +136,7 @@ exports.updateUserProfile = async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findById(req.user.userId);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json(response(false, "User not found"));
 
     // Update username if provided
     if (username) user.username = username;
@@ -146,9 +148,9 @@ exports.updateUserProfile = async (req, res) => {
     }
 
     await user.save();
-    res.json({ message: "Profile updated successfully" });
+    res.json(response(true, "Profile updated successfully", user));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 
@@ -173,9 +175,9 @@ exports.resendVerificationEmail = async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json(response(false, "User not found"));
 
-    if (user.isVerified) return res.status(400).json({ message: "Email is already verified" });
+    if (user.isVerified) return res.status(400).json(response(false, "Email already verified"));
 
     // Generate a new verification token if needed
     user.verificationToken = crypto.randomBytes(32).toString("hex");
@@ -183,9 +185,9 @@ exports.resendVerificationEmail = async (req, res) => {
 
     await sendVerificationEmail(user);
 
-    res.json({ message: "Verification email resent successfully" });
+    res.json(response(true, "Verification Sent!"));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(true, error.message));
   }
 };
 
@@ -195,22 +197,22 @@ exports.verifyEmail = async (req, res) => {
     const { token } = req.query;
 
     if (!token) {
-      return res.status(400).json({ message: "Missing token" });
+      return res.status(400).json(response(false, "Missing Token"));
     }
 
     const user = await User.findOne({ verificationToken: token });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid or expired token" });
+      return res.status(400).json(response(false, "Invalid or expired Token"));
     }
 
     user.isVerified = true;
     user.verificationToken = null; // Clear token after verification
     await user.save();
 
-    res.json({ message: "Email verified successfully. You can now log in." });
+    res.json(response(true, "Email verified successfully. You can now log in."));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 
@@ -221,7 +223,7 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json(response(false, "User not found"));
     }
 
     // Generate reset token (valid for 15 minutes)
@@ -252,9 +254,9 @@ exports.forgotPassword = async (req, res) => {
       `,
     });
 
-    res.json({ message: "Password reset email sent" });
+    res.json(response(true, "Link sent!"));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(response(false, error.message));
   }
 };
 
@@ -262,9 +264,9 @@ exports.validateResetToken = async (req, res) => {
   try {
     const { token } = req.query;
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ message: "Token is valid", userId: decoded.userId });
+    res.json(response(true, "Valid Token", decoded.userId));
   } catch (error) {
-    res.status(400).json({ message: "Invalid or expired token" });
+    res.status(400).json(response(false, "Invalid or Expired Token"));
   }
 };
 
@@ -273,7 +275,7 @@ exports.resetPassword = async (req, res) => {
     const { token, newPassword } = req.query;
 
     if (!token) {
-      return res.status(400).json({ message: "Missing token" });
+      return res.status(400).json(response(false, "Missing Token"));
     }
 
     if (!newPassword) {
@@ -285,7 +287,7 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findById(decoded.userId);
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid token or user not found" });
+      return res.status(400).json(response(false, "Invalid Token or User not found"));
     }
 
     // Hash new password
@@ -294,9 +296,9 @@ exports.resetPassword = async (req, res) => {
     
     await user.save();
     
-    res.json({ message: "Password has been reset. You can now log in." });
+    res.json(response(true, "Password Changed!"));
   } catch (error) {
-    res.status(400).json({ message: "Invalid or expired token" });
+    res.status(400).json(response(false, error.message));
   }
 };
 

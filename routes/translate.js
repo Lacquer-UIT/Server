@@ -4,21 +4,21 @@ const response = require("../dto");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const query = req.query.englishText;
-    if (!query) {
-      return res.status(400).json(response(false, "Missing 'englishText' parameter"));
+    const { englishText } = req.body;
+    if (!englishText) {
+      return res.status(400).json(response(false, "Missing 'englishText' in request body"));
     }
 
-    console.log(`Received request: ${query}`);
+    console.log(`Received request: ${englishText}`);
 
     let vietnameseText = "";
 
     // Check if text is longer than 100 characters
-    if (query.length > 100) {
+    if (englishText.length > 100) {
       // Split by sentences (using period followed by space as separator)
-      const sentences = query.split(/\.\s+/);
+      const sentences = englishText.split(/\.\s+/);
 
       // Translate each sentence separately and join
       const translations = await Promise.all(
@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
 
       vietnameseText = translations.join(". ");
     } else {
-      vietnameseText = await translateToVietnamese(query);
+      vietnameseText = await translateToVietnamese(englishText);
     }
 
     console.log(`Translation success: ${vietnameseText}`);

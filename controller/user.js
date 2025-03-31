@@ -3,10 +3,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const env = require('dotenv').config();
 const response = require("../dto");
+const { OAuth2Client } = require('google-auth-library');
+
 
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -31,25 +31,35 @@ exports.registerUser = async (req, res) => {
   try {
     console.log("🔹 Received register request:", req.body);
 
-    const { username, email, password, authProvider, googleId } = req.body;
+    const { username, email, password } = req.body;
 
     let user = await User.findOne({ email });
-    if (user) {
-      console.log("⚠️ Email already exists:", email);
-      return res.status(400).json(response(false,"Email existed"));
-    }
-
     let passwordHash = null;
-    if (authProvider === "local") {
+    if (user) {
+      // If already has local auth, return error
+      if (user.authProvider.includes('local')) {
+        console.log("⚠️ Email already exists with password auth:", email);
+        return res.status(400).json(response(false, "Email already exists with password authentication"));
+      }
+      
+      // If has Google auth but no local auth, prompt to add password instead
+      if (user.authProvider.includes('google') && !user.authProvider.includes('local')) {
+        console.log("⚠️ User exists with Google auth only:", email);
+        const salt = await bcrypt.genSalt(10);
+        passwordHash = await bcrypt.hash(password, salt);
+        user.passwordHash = passwordHash;
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
+        return res.status(200).json(response(true, "Sign up successful", {token, userId: user._id, username: user.username}));
+      }
+    }
       if (!password) {
         console.log("⚠️ Password is missing for local auth.");
-        return res.status(400).json(response(false,"Password missing"));
+        return res.status(400).json(response(false,"Password is required for email registration"));
       }
 
       const salt = await bcrypt.genSalt(10);
       passwordHash = await bcrypt.hash(password, salt);
       console.log("🔹 Generated hashed password:", passwordHash);
-    }
 
     // Generate a verification token
     const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -60,11 +70,10 @@ exports.registerUser = async (req, res) => {
       username,
       email,
       passwordHash,
-      authProvider,
-      googleId: authProvider === "google" ? googleId : null,
       verificationToken,
-      avatar,
-      isVerified: authProvider === "google", // Google users are auto-verified
+      avatar: null,
+      isVerified: false, 
+      authProvider: "local",
     });
 
     console.log("📝 User object before saving:", user);
@@ -72,14 +81,11 @@ exports.registerUser = async (req, res) => {
     await user.save();
 
     // Send verification email for local users
-    if (authProvider === "local") {
-      console.log("📧 Sending verification email...");
-      await sendVerificationEmail(user);
-      console.log("✅ Verification email sent!");
-    }
+    await sendVerificationEmail(user);
 
     console.log("✅ User registered successfully.");
-    res.status(201).json(response(true, "Register successfully, Please check your email for verification"));
+    res.status(201).json(response(true, 
+      "Register successfully, Please check your email for verification"));
   } catch (error) {
     console.error("❌ Error registering user:", error.message);
     res.status(500).json(response(false, error.message));
@@ -98,15 +104,15 @@ exports.loginUser = async (req, res) => {
       return res.status(403).json(response(false, "Please verify before signing in"));
     }
 
-    if (user.authProvider === "local") {
+    if (user.authProviders.includes('local')) {
       if (!password) return res.status(400).json(response, "Please enter password");
 
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) return res.status(400).json(response(false, "Wrong Password"));
     }
 
-    if (user.authProvider === "google" && googleId !== user.googleId) {
-      return res.status(400).json(response(false, "Invalid Google Authentication"));
+    if (user.authProviders.includes('google')) {
+      return res.status(400).json(response(false, "sign up with password or sign in with google"));
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
@@ -272,7 +278,7 @@ exports.validateResetToken = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, newPassword } = req.query;
+    const { token, newPassword } = req.body;
 
     if (!token) {
       return res.status(400).json(response(false, "Missing Token"));
@@ -301,62 +307,106 @@ exports.resetPassword = async (req, res) => {
     res.status(400).json(response(false, error.message));
   }
 };
+exports.sendTokenToClient= async (req, res) => {
+  try {
+    const { token } = req.query;
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.BASE_URL}/auth/google/callback`,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const email = profile.emails[0].value;
-        let user = await User.findOne({ email });
-
-        if (user) {
-          if (user.authProvider === "local") {
-            // Convert local account to Google OAuth
-            user.googleId = profile.id;
-            user.authProvider = "google";
-            user.avatar = profile.photos[0].value;
-            user.isVerified = true; // Google verifies emails
-            await user.save();
-          }
-        } else {
-          // Create new Google user
-          user = await User.create({
-            googleId: profile.id,
-            name: profile.displayName,
-            email,
-            authProvider: "google",
-            avatar: profile.photos[0].value,
-            isVerified: true, // Google users are always verified
-          });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, {
-          expiresIn: "7d",
-        });
-
-        return done(null, { user, token });
-      } catch (error) {
-        return done(error, null);
-      }
+    if (!token) {
+      return res.status(400).json(response(false, "Missing Token"));
     }
-  )
-);
-// Serialize & Deserialize user (for session handling)
-passport.serializeUser((user, done) => {
-done(null, user.id);
-});
+    else return res.redirect(`lacquer://reset?token=${encodeURIComponent(token)}`);
+  }
+  catch(e){
+    return res.status(400).json(response(false, e));
+  }
+};
 
-passport.deserializeUser(async (id, done) => {
-const user = await User.findById(id);
-done(null, user);
-});
+// Google Sign-In for Mobile
+exports.handleGoogleAuth = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    
+    if (!idToken) {
+      return res.status(400).json(response(false, "Google ID token is required"));
+    }
 
+    // Verify the Google ID token
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    
+    const payload = ticket.getPayload();
+    
+    // Extract user information from the verified token
+    const { email, name, picture, sub: googleId } = payload;
+    
+    // Check if user exists with this email
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // If user exists but authenticated via local method before
+      if (user.authProvider === "local") {
+        // Update user record to link Google account
+        user.googleId = googleId;
+        user.authProvider = "google";
+        // Only update avatar if it's null
+        if (!user.avatar) {
+          user.avatar = picture;
+        }
+        user.isVerified = true; // Google verifies emails
+        await user.save();
+      } else if (user.authProvider === "google" && user.googleId !== googleId) {
+        // Update googleId if it changed
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // Create new user with Google authentication
+      user = new User({
+        username: name,
+        email,
+        googleId,
+        authProvider: "google",
+        avatar: picture,
+        isVerified: true,
+      });
+      
+      await user.save();
+    }
+    
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    
+    // Return user data and token
+    return res.json(response(true, "Google authentication successful", { 
+      token, 
+      userId: user._id, 
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar 
+    }));
+    
+  } catch (error) {
+    console.error("❌ Google authentication error:", error);
+    return res.status(500).json(response(false, "Google authentication failed: " + error.message));
+  }
+};
+
+// Google OAuth callback handler (used in web flows, but included for completeness)
+exports.googleAuthCallback = (req, res) => {
+  passport.authenticate('google', { session: false }, (err, data) => {
+    if (err || !data) {
+      return res.redirect(`${process.env.MOBILE_APP_SCHEME}://auth/error?message=${encodeURIComponent('Authentication failed')}`);
+    }
+    
+    const { user, token } = data;
+    // Redirect to mobile app with token
+    return res.redirect(`${process.env.MOBILE_APP_SCHEME}://auth/success?token=${token}&userId=${user._id}`);
+  })(req, res);
+};
 
 const sendVerificationEmail = async (user) => {
   if (!user?.email || !user?.verificationToken) return;

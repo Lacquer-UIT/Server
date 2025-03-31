@@ -2,18 +2,17 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    username: { type: String, required: function () { return this.authProvider === "local"; } }, // Required only for local users
+    username: { type: String, required: function () { return this.authProvider === "local"; } }, 
     email: { type: String, required: true, unique: true },
-    passwordHash: { type: String, default: null }, // Only local users need this
-    authProvider: { type: String, enum: ["local", "google"], required: true },
+    passwordHash: { type: String, default: null }, 
+    avatar: { type: String, default: null }, 
     
-    // Google OAuth fields
+    // Authentication provider tracking
+    authProvider: { type: String, enum: ['local', 'google'], default: [] },
     googleId: { type: String, default: null },
-    name: { type: String, default: null }, // For Google users
-    avatar: { type: String, default: null }, // Store Google profile picture
     
     // Email verification
-    isVerified: { type: Boolean, default: function () { return this.authProvider !== "local"; } }, // Google users are verified by default
+    isVerified: { type: Boolean, default: function () { return this.authProvider !== "local"; } }, 
     verificationToken: { type: String, default: null },
   },
   { timestamps: true }

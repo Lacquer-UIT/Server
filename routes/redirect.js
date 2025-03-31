@@ -4,9 +4,11 @@ var router = express.Router();
 const {
     verifyEmail,
     resetPassword,
+    sendTokenToClient
   } = require("../controller/user");
 
 router.get("/verify", verifyEmail);
-router.get("/reset", resetPassword);
+router.post("/reset", resetPassword);
+router.get("/reset", sendTokenToClient)
 
 module.exports = router

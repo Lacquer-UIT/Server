@@ -15,6 +15,11 @@ const DeckSchema = new mongoose.Schema({
     img: { 
         type: String 
     },
+    tags: [{
+        type: String,
+        enum: ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'],
+        default: []
+    }],
     cards: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Dictionary' 

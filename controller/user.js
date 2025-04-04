@@ -104,14 +104,14 @@ exports.loginUser = async (req, res) => {
       return res.status(403).json(response(false, "Please verify before signing in"));
     }
 
-    if (user.authProviders.includes('local')) {
+    if (user.authProvider.includes('local')) {
       if (!password) return res.status(400).json(response, "Please enter password");
 
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) return res.status(400).json(response(false, "Wrong Password"));
     }
 
-    if (user.authProviders.includes('google')) {
+    if (user.authProvider.includes('google')) {
       return res.status(400).json(response(false, "sign up with password or sign in with google"));
     }
 

@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: null }, 
     
     // Authentication provider tracking
-    authProvider: { type: String, enum: ['local', 'google'], default: [] },
+    authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
     googleId: { type: String, default: null },
     
     // Email verification

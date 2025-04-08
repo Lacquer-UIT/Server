@@ -32,7 +32,7 @@ router.delete("/delete", authMiddleware, deleteUser);
 
 // Google OAuth routes for mobile
 router.post("/google", handleGoogleAuth);
-router.get("/google/callback", googleAuthCallback);
+router.get("/google/callback", googleAuthCallback); // unused in mobile, but can be used for web
 router.get("/token", sendTokenToClient);
 
 module.exports = router;

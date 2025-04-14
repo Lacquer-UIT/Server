@@ -4,6 +4,8 @@ Lacquer Server is the backend service for the Lacquer project, a Vietnamese cult
 
 The server is online [here](https://lacquer.up.railway.app/).
 
+> Download Postman json here: [Download Postman collection](https://raw.githubusercontent.com/Lacquer-UIT/.github/main/assets/Lacquer%20API.json)
+
 ## 📜 License
 This project is licensed under the MIT License.
 

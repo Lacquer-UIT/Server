@@ -17,7 +17,7 @@ var translateRouter = require('./routes/translate');
 var authRouter = require('./routes/auth');
 var redirectRouter = require('./routes/redirect');
 var deckRouter = require("./routes/deck");
-const deck = require("./models/deck");
+var landmarkRouter = require("./routes/landmark");
 
 var app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,7 +68,7 @@ app.use('/auth', authRouter);
 app.use("/chatbot", chatbotRouter);
 app.use("/redirect", redirectRouter);
 app.use("/deck", deckRouter)
-
+app.use("/landmark", landmarkRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

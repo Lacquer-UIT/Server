@@ -1,0 +1,13 @@
+FROM python:3.12
+
+WORKDIR /app
+
+# Just copy the file normally now
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 3030
+
+CMD ["python3", "classify.py"]

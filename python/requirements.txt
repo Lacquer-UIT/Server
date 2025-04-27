@@ -1,7 +1,7 @@
-flask==2.3.3
-transformers==4.34.0
-torch==2.0.1
-pillow==10.0.1
-numpy>=1.24.0
-gunicorn==21.2.0
-requests==2.31.0
+flask
+transformers
+torch
+pillow
+numpy
+gunicorn
+requests

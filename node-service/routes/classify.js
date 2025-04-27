@@ -25,7 +25,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
   try {
     // Send the image to the Python backend for classification
-    const response = await axios.post(process.env.Flask_URL, form, {
+    const response = await axios.post(`${process.env.Flask_URL}/classify`, form, {
       headers: form.getHeaders()
     });
 

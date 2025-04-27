@@ -58,7 +58,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
+// Routes
+app.get("/", (req, res) => {
+  res.render("index", {
+    title: "Lacquer - Vietnamese Inspired Web Platform",
+    description: "A bold and charismatic web platform inspired by Vietnamese culture",
+  })
+})
 app.use('/users', usersRouter);
 app.use('/search', searchRouter);
 app.use('/random', randomRouter);

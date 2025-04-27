@@ -1,0 +1,66 @@
+<header class="sticky top-0 z-50 w-full border-b bg-background">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <div class="relative h-10 w-10 mr-2 sm:h-12 sm:w-12 ">
+          <img src="/assets/logoMarkLacquer.png" alt="Lacquer Logo" class="object-contain h-full w-full" />
+        </div>
+        <span class="vietnam-text text-xl font-bold text-primary">LacQuer</span>
+      </div>
+  
+      <nav class="hidden md:flex space-x-8">
+        <a href="#" class="nav-link text-foreground hover:text-primary transition-colors">
+          Home
+        </a>
+        <a href="#about" class="nav-link text-foreground hover:text-primary transition-colors">
+          About
+        </a>
+        <a href="#features" class="nav-link text-foreground hover:text-primary transition-colors">
+          Features
+        </a>
+        <a href="#team" class="nav-link text-foreground hover:text-primary transition-colors">
+          Team
+        </a>
+      </nav>
+  
+      <div class="flex items-center gap-4">
+        <button id="theme-toggle" class="h-9 w-9 rounded-md p-2 text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sun-icon">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="moon-icon hidden">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+        </button>
+        <button id="mobile-menu-toggle" class="md:hidden text-foreground focus:outline-none transition-transform duration-300 hover:rotate-12 hover:bg-primary hover:text-primary-foreground p-2 rounded-md" aria-label="Toggle menu">
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-b">
+        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-300">Home</a>
+        <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-300">About</a>
+        <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-300">Features</a>
+        <a href="#team" class="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-300">Team</a>
+      </div>
+    </div>
+  </header>
+  

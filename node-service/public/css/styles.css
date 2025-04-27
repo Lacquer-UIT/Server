@@ -1,0 +1,550 @@
+:root {
+    --background: 0, 0%, 100%;
+    --foreground: 20, 14.3%, 4.1%;
+    --card: 0, 0%, 100%;
+    --card-foreground: 20, 14.3%, 4.1%;
+    --popover: 0, 0%, 100%;
+    --popover-foreground: 20, 14.3%, 4.1%;
+    --primary: 0, 72%, 38%; /* Vietnamese red */
+    --primary-foreground: 60, 9.1%, 97.8%;
+    --primary-light: 0, 72%, 45%; /* Lighter Vietnamese red for gradients */
+    --primary-dark: 0, 72%, 30%; /* Darker Vietnamese red for hover states */
+    --secondary: 47, 100%, 67%; /* Golden yellow */
+    --secondary-foreground: 24, 9.8%, 10%;
+    --muted: 60, 4.8%, 95.9%;
+    --muted-foreground: 25, 5.3%, 44.7%;
+    --accent: 142, 70.6%, 29.8%; /* Bamboo green */
+    --accent-foreground: 60, 9.1%, 97.8%;
+    --destructive: 0, 84.2%, 60.2%;
+    --destructive-foreground: 60, 9.1%, 97.8%;
+    --border: 20, 5.9%, 90%;
+    --input: 20, 5.9%, 90%;
+    --ring: 0, 72%, 38%;
+    --radius: 0.5rem;
+  
+    /* Footer colors */
+    --footer-bg: 0, 0%, 98%;
+    --footer-text: 20, 14.3%, 4.1%;
+  }
+  
+  .dark {
+    --background: 220, 13%, 18%; /* Softer dark background - less intense than black */
+    --foreground: 60, 9.1%, 97.8%;
+    --card: 222, 14%, 15%;
+    --card-foreground: 60, 9.1%, 97.8%;
+    --popover: 222, 14%, 15%;
+    --popover-foreground: 60, 9.1%, 97.8%;
+    --primary: 0, 72%, 50%; /* Brighter Vietnamese red for dark mode */
+    --primary-light: 0, 72%, 60%; /* Lighter Vietnamese red for gradients in dark mode */
+    --primary-dark: 0, 72%, 40%; /* Darker Vietnamese red for hover states in dark mode */
+    --primary-foreground: 60, 9.1%, 97.8%;
+    --secondary: 47, 100%, 67%;
+    --secondary-foreground: 24, 9.8%, 10%;
+    --muted: 217, 19%, 27%;
+    --muted-foreground: 24, 5.4%, 63.9%;
+    --accent: 142, 70.6%, 29.8%;
+    --accent-foreground: 60, 9.1%, 97.8%;
+    --destructive: 0, 62.8%, 30.6%;
+    --destructive-foreground: 60, 9.1%, 97.8%;
+    --border: 217, 19%, 27%;
+    --input: 217, 19%, 27%;
+    --ring: 0, 72%, 50%;
+  
+    /* Footer colors for dark mode */
+    --footer-bg: 222, 14%, 22%;
+    --footer-text: 60, 9.1%, 97.8%;
+  }
+  
+  body {
+    font-family: "Inter", sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+  
+  .bg-foreground {
+    background-color: hsl(var(--foreground));
+  }
+  
+  .bg-card {
+    background-color: hsl(var(--card));
+  }
+  
+  .bg-card-foreground {
+    background-color: hsl(var(--card-foreground));
+  }
+  
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+  
+  .bg-primary-foreground {
+    background-color: hsl(var(--primary-foreground));
+  }
+  
+  .bg-primary-dark {
+    background-color: hsl(var(--primary-dark));
+  }
+  
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+  }
+  
+  .bg-secondary-foreground {
+    background-color: hsl(var(--secondary-foreground));
+  }
+  
+  .bg-muted {
+    background-color: hsl(var(--muted));
+  }
+  
+  .bg-muted-foreground {
+    background-color: hsl(var(--muted-foreground));
+  }
+  
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+  
+  .bg-accent-foreground {
+    background-color: hsl(var(--accent-foreground));
+  }
+  
+  .bg-footer {
+    background-color: hsl(var(--footer-bg));
+  }
+  
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+  
+  .text-primary {
+    color: hsl(var(--primary));
+  }
+  
+  .text-primary-foreground {
+    color: hsl(var(--primary-foreground));
+  }
+  
+  .text-secondary {
+    color: hsl(var(--secondary));
+  }
+  
+  .text-secondary-foreground {
+    color: hsl(var(--secondary-foreground));
+  }
+  
+  .text-muted {
+    color: hsl(var(--muted));
+  }
+  
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+  
+  .text-accent {
+    color: hsl(var(--accent));
+  }
+  
+  .text-accent-foreground {
+    color: hsl(var(--accent-foreground));
+  }
+  
+  .border {
+    border-color: hsl(var(--border));
+    transition: border-color 0.3s ease;
+  }
+  
+  .border-t {
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: hsl(var(--border));
+    transition: border-color 0.3s ease;
+  }
+  
+  .border-b {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: hsl(var(--border));
+    transition: border-color 0.3s ease;
+  }
+  
+  .hero-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4261d' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-pattern::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, hsla(var(--primary), 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .dark .hero-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff4d4d' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  .nav-link {
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+  
+  .nav-link:hover::after {
+    width: 100%;
+  }
+  
+  /* Vietnam text styling */
+  .vietnam-text-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .vietnam-text {
+    font-family: "Albert Sans", sans-serif;
+    letter-spacing: -0.02em;
+    color: hsl(var(--primary));
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .vietnam-text-decoration {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    border-radius: 2px;
+    animation: pulse 3s infinite;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(-50%) scaleX(1.2);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes bounce-x {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(5px);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsla(var(--primary), 0) 0%,
+      hsla(var(--primary), 0.1) 50%,
+      hsla(var(--primary), 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+  
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out forwards;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out forwards;
+  }
+  
+  .animate-bounce-x {
+    animation: bounce-x 1.5s infinite;
+  }
+  
+  /* Theme toggle */
+  #theme-toggle {
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+  }
+  
+  #theme-toggle:hover {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  
+  #theme-toggle .sun-icon {
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  
+  #theme-toggle .moon-icon {
+    display: none;
+    transition: transform 0.5s ease;
+  }
+  
+  .dark #theme-toggle .sun-icon {
+    display: none;
+  }
+  
+  .dark #theme-toggle .moon-icon {
+    display: block;
+  }
+  
+  /* Enhanced card styles */
+  .group {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+  
+  .group:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Enhanced button styles */
+  a[href],
+  button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  a[href]:hover,
+  button:hover {
+    background-color: hsl(var(--primary-dark));
+    color: hsl(var(--primary-foreground));
+  }
+  
+  a[href]:active,
+  button:active {
+    transform: scale(0.98);
+  }
+  
+  /* Responsive utilities */
+  @media (min-width: 768px) {
+    .md\:flex {
+      display: flex;
+    }
+  
+    .md\:hidden {
+      display: none;
+    }
+  
+    .md\:w-1\/2 {
+      width: 50%;
+    }
+  
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .md\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  
+    .md\:items-start {
+      align-items: flex-start;
+    }
+  
+    .md\:text-left {
+      text-align: left;
+    }
+  
+    .md\:mx-0 {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  
+    .md\:mb-0 {
+      margin-bottom: 0;
+    }
+  
+    .md\:flex-row {
+      flex-direction: row;
+    }
+  
+    .md\:py-32 {
+      padding-top: 8rem;
+      padding-bottom: 8rem;
+    }
+  }
+  
+  /* Scroll reveal animations */
+  .reveal {
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .reveal-left {
+    transform: translateX(-30px);
+  }
+  
+  .reveal-right {
+    transform: translateX(30px);
+  }
+  
+  .reveal-up {
+    transform: translateY(30px);
+  }
+  
+  .reveal-down {
+    transform: translateY(-30px);
+  }
+  
+  /* Vietnamese-inspired decorative elements */
+  .bamboo-pattern {
+    position: relative;
+  }
+  
+  .bamboo-pattern::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0v20M0 10h20' stroke='%232e6930' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E");
+    opacity: 0.1;
+    pointer-events: none;
+  }
+  
+  .dark .bamboo-pattern::before {
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0v20M0 10h20' stroke='%2350a050' stroke-opacity='0.1' stroke-width='1'/%3E%3C/svg%3E");
+  }
+  
+  /* Decorative circles */
+  .decorative-circles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+  
+  .decorative-circles::before,
+  .decorative-circles::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.05;
+  }
+  
+  .decorative-circles::before {
+    top: 10%;
+    right: -5%;
+    width: 300px;
+    height: 300px;
+    background-color: hsl(var(--primary));
+    animation: float 15s ease-in-out infinite;
+  }
+  
+  .decorative-circles::after {
+    bottom: 5%;
+    left: -5%;
+    width: 250px;
+    height: 250px;
+    background-color: hsl(var(--accent));
+    animation: float 12s ease-in-out infinite reverse;
+  }
+  

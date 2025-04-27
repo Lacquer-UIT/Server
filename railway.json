@@ -1,0 +1,9 @@
+{
+    "services": [
+      {
+        "type": "docker",
+        "name": "Lacquer",
+        "dockerfile": "./Dockerfile"
+      }
+    ]
+  }

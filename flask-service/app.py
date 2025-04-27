@@ -3,6 +3,11 @@ from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 import torch
 import os
+from dotenv import load_dotenv
+from huggingface_hub import login
+
+hf_token = os.getenv("HF_TOKEN")  # Get the token from the environment variable
+login(token=hf_token)  # Log in using the token
 
 app = Flask(__name__)
 

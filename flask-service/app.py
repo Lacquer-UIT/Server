@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 # Load model ONCE
 print("🔁 Loading model...")
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("wkcn/TinyCLIP-ViT-61M-32-Text-29M-LAION400M")
+model = CLIPModel.from_pretrained("wkcn/TinyCLIP-ViT-61M-32-Text-29M-LAION400M")
 model.eval()
 device = torch.device("cpu")
 model = model.to(device)
@@ -61,7 +61,7 @@ LABELS = [
 
     "a Non La, traditional Vietnamese conical hat",
     "a person wearing an Ao Dai, Vietnamese long dress",
-    "a parked motorbike on a Vietnamese street",
+    "a motorbike on a Vietnamese street",
     "a red Lì Xì envelope used during Lunar New Year",
     "the national flag of the Socialist Republic of Vietnam, red with a yellow star",
     "a traditional Vietnamese lacquer painting, also known as sơn mài",
@@ -119,7 +119,7 @@ SIMPLIFIED_LABELS = {
 
     "a Non La, traditional Vietnamese conical hat": "Non La",
     "a person wearing an Ao Dai, Vietnamese long dress": "Ao Dai",
-    "a parked motorbike on a Vietnamese street": "Parked Motorbike",
+    "a motorbike on a Vietnamese street": "Parked Motorbike",
     "a red Lì Xì envelope used during Lunar New Year": "Lì Xì Envelope",
     "the national flag of the Socialist Republic of Vietnam, red with a yellow star": "Vietnam Flag",
     "a traditional Vietnamese lacquer painting, also known as sơn mài": "Lacquer Painting",

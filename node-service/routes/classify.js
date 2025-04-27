@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const response = require("../dto");
+require("dotenv").config();
+
 
 const multer = require('multer');
 const axios = require('axios');
@@ -23,7 +25,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
   try {
     // Send the image to the Python backend for classification
-    const response = await axios.post('http://python-service:3030/classify', form, {
+    const response = await axios.post(process.env.Flask_URL, form, {
       headers: form.getHeaders()
     });
 

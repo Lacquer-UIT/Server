@@ -1,9 +1,0 @@
-flask
-transformers
-torch
-pillow
-numpy
-gunicorn
-requests
-huggingface_hub
-python-dotenv

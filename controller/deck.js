@@ -51,7 +51,7 @@ exports.getDeckById = async (req, res) => {
 // Create new deck with current user as owner
 exports.createDeck = async (req, res) => {
   try {
-    const { title, description, img, cards } = req.body;
+    const { title, description, img, cards, tags } = req.body;
     
     if (!req.user || !req.user.userId) {
       return res.status(401).json(createResponse(false, 'Authentication required to create a deck'));
@@ -71,11 +71,21 @@ exports.createDeck = async (req, res) => {
         return res.status(400).json(createResponse(false, 'One or more cards do not exist'));
       }
     }
+
+    if (tags) {
+      const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
+      const invalidTags = tags.filter(tag => !validTags.includes(tag));
+      
+      if (invalidTags.length > 0) {
+        return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
+      }
+    }
     
     const deck = await Deck.create({
       title,
       description,
       img,
+      tags,
       cards: cards || [],
       owner: req.user.userId
     });
@@ -93,12 +103,13 @@ exports.createDeck = async (req, res) => {
 // Update deck (with owner verification)
 exports.updateDeck = async (req, res) => {
   try {
-    const { title, description, img, cards } = req.body;
+    const { title, description, img, cards, tags } = req.body;
     const updateData = {};
     
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (img !== undefined) updateData.img = img;
+    if (tags !== undefined) updateData.tags = tags;
     
     if (cards !== undefined) {
       if (cards.length > 0) {
@@ -129,6 +140,15 @@ exports.updateDeck = async (req, res) => {
     
     if (deck.owner !== req.user.userId) {
       return res.status(403).json(createResponse(false, 'Not authorized to update this deck'));
+    }
+
+    if (tags !== undefined) {
+      const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
+      const invalidTags = tags.filter(tag => !validTags.includes(tag));
+      
+      if (invalidTags.length > 0) {
+        return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
+      }
     }
     
     const updatedDeck = await Deck.findByIdAndUpdate(

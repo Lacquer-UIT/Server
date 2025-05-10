@@ -87,9 +87,23 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  // set status code
+  const statusCode = err.status || 500;
+  
+  // check if the request accepts HTML (browser request)
+  if (req.accepts('html')) {
+    // render the error page for browsers
+    res.status(statusCode);
+    res.render("error");
+  } else {
+    // return JSON error for API requests
+    res.status(statusCode).json({
+      success: false,
+      message: err.message,
+      error: req.app.get("env") === "development" ? err : {},
+      status: statusCode
+    });
+  }
 });
 
 module.exports = app;

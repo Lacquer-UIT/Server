@@ -1,5 +1,6 @@
 const express = require("express");
 const response = require("../dto");
+const apiLimiter = require('../middleware/rateLimiter');
 
 const router = express.Router();
 const { Translate } = require('@google-cloud/translate').v2;
@@ -23,6 +24,9 @@ try {
   console.error('Error initializing Google Translate client:', error);
   throw error;
 }
+
+// Apply rate limiter to all routes in this router
+router.use(apiLimiter);
 
 /**
  * @route POST /translate

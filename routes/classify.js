@@ -6,6 +6,7 @@ const axios = require('axios');
 const response = require('../dto');
 const authMiddleware = require('../middleware/auth');
 const path = require('path');
+const apiLimiter = require('../middleware/rateLimiter');
 
 // Use the upload middleware from middleware/upload.js
 const upload = require('../middleware/upload');
@@ -29,6 +30,9 @@ try {
   console.error('Error initializing Google Vision client:', error);
   throw error;
 }
+
+// Apply rate limiter to all routes in this router
+router.use(apiLimiter);
 
 router.post('/landmark', authMiddleware, upload.single('image'), async (req, res) => {
   try {

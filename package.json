@@ -7,6 +7,7 @@
     "devStart": "nodemon app.js"
   },
   "dependencies": {
+    "@google-cloud/translate": "^9.0.1",
     "@google-cloud/vision": "^5.1.0",
     "@google/generative-ai": "^0.23.0",
     "@xenova/transformers": "^2.17.2",

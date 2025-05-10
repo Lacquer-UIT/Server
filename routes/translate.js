@@ -1,47 +1,65 @@
 const express = require("express");
-const { translateToVietnamese } = require("../huggingface/transformer");
 const response = require("../dto");
 
 const router = express.Router();
+const { Translate } = require('@google-cloud/translate').v2;
 
-router.post("/", async (req, res) => {
+// Initialize Google Translate client with credentials
+let translateClient;
+try {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    // Use credentials from environment variable string
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    translateClient = new Translate({ credentials });
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // Use credentials from file path
+    translateClient = new Translate({
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+    });
+  } else {
+    throw new Error('No Google Cloud credentials found');
+  }
+} catch (error) {
+  console.error('Error initializing Google Translate client:', error);
+  throw error;
+}
+
+/**
+ * @route POST /translate
+ * @desc Translate text from source language to target language
+ * @access Public
+ */
+router.post('/', async (req, res) => {
   try {
-    const { englishText } = req.body;
-    if (!englishText) {
-      return res.status(400).json(response(false, "Missing 'englishText' in request body"));
+    const { text, source, target } = req.body;
+
+    // Validate request body
+    if (!text) {
+      return res.status(400).json(response(false, 'Text to translate is required'));
+    }
+    
+    if (!target) {
+      return res.status(400).json(response(false, 'Target language is required'));
     }
 
-    console.log(`Received request: ${englishText}`);
+    // Translate the text
+    const [translation] = await translateClient.translate(text, {
+      from: source || 'auto', // If source is not provided, detect language
+      to: target
+    });
 
-    let vietnameseText = "";
-
-    // Check if text is longer than 100 characters
-    if (englishText.length > 100) {
-      // Split by sentences (using period followed by space as separator)
-      const sentences = englishText.split(/\.\s+/);
-
-      // Translate each sentence separately and join
-      const translations = await Promise.all(
-        sentences.map(async (sentence) => {
-          // Add back the period if it's not the last empty segment
-          const sentenceToTranslate = sentence.trim();
-          if (!sentenceToTranslate) return "";
-
-          return await translateToVietnamese(sentenceToTranslate);
-        })
-      );
-
-      vietnameseText = translations.join(". ");
-    } else {
-      vietnameseText = await translateToVietnamese(englishText);
-    }
-
-    console.log(`Translation success: ${vietnameseText}`);
-    res.json(response(true, "Translation successful", vietnameseText));
+    return res.status(200).json(response(true, 'Translation successful', {
+      originalText: text,
+      translatedText: translation,
+      sourceLanguage: source || 'auto',
+      targetLanguage: target
+    }));
+    
   } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json(response(false, "Translation failed"));
+    console.error('Translation error:', error);
+    return res.status(500).json(response(false, 'Error translating text: ' + error.message));
   }
 });
+
 
 module.exports = router;

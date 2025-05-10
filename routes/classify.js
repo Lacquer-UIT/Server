@@ -7,9 +7,7 @@ const response = require('../dto');
 const authMiddleware = require('../middleware/auth');
 const path = require('path');
 const apiLimiter = require('../middleware/rateLimiter');
-
-// Use the upload middleware from middleware/upload.js
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 
 // Initialize Google Vision client with credentials from either environment variable or file
 let visionClient;

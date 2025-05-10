@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const deckController = require('../controller/deck');
 const authMiddleware = require('../middleware/auth'); // Updated to your actual middleware file
+const { upload, handleUpload } = require('../middleware/upload');
 
 // Base routes for decks
 router.route('/')
-  .get(authMiddleware,deckController.getAllDecks)
-  .post(authMiddleware, deckController.createDeck);
+  .get(authMiddleware, deckController.getAllDecks)
+  .post(authMiddleware, upload.single('image'), handleUpload, deckController.createDeck);
 
 router.route('/:id')
   .get(deckController.getDeckById)
-  .put(authMiddleware, deckController.updateDeck)
+  .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
   .delete(authMiddleware, deckController.deleteDeck);
 
 // Card management within decks

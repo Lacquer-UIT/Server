@@ -153,8 +153,34 @@ exports.updateUserProfile = async (req, res) => {
       user.passwordHash = await bcrypt.hash(password, salt);
     }
 
+    // Update avatar if file was uploaded
+    if (req.uploadedFile) {
+      user.avatar = req.uploadedFile.secure_url;
+    }
+
     await user.save();
     res.json(response(true, "Profile updated successfully", user));
+  } catch (error) {
+    res.status(500).json(response(false, error.message));
+  }
+};
+
+// Update User Avatar
+exports.updateAvatar = async (req, res) => {
+  try {
+    if (!req.uploadedFile) {
+      return res.status(400).json(response(false, "No image uploaded"));
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json(response(false, "User not found"));
+    }
+
+    user.avatar = req.uploadedFile.secure_url;
+    await user.save();
+
+    res.json(response(true, "Avatar updated successfully", { avatar: user.avatar }));
   } catch (error) {
     res.status(500).json(response(false, error.message));
   }

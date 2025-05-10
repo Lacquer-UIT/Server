@@ -51,7 +51,23 @@ exports.getDeckById = async (req, res) => {
 // Create new deck with current user as owner
 exports.createDeck = async (req, res) => {
   try {
-    const { title, description, img, cards, tags } = req.body;
+    const { title, description } = req.body;
+    console.log('Request body:', req.body);
+    
+    // Handle arrays from form data
+    let cards = req.body.cards || [];
+    let tags = req.body.tags || [];
+    
+    // Convert to array if needed
+    if (!Array.isArray(cards)) {
+      cards = [cards].filter(Boolean);
+    }
+    
+    if (!Array.isArray(tags)) {
+      tags = [tags].filter(Boolean);
+    }
+    
+    console.log('Processed deck data:', { title, description, tags, cards });
     
     if (!req.user || !req.user.userId) {
       return res.status(401).json(createResponse(false, 'Authentication required to create a deck'));
@@ -72,7 +88,7 @@ exports.createDeck = async (req, res) => {
       }
     }
 
-    if (tags) {
+    if (tags && tags.length > 0) {
       const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
       const invalidTags = tags.filter(tag => !validTags.includes(tag));
       
@@ -81,12 +97,15 @@ exports.createDeck = async (req, res) => {
       }
     }
     
+    // Use image URL from Cloudinary if an image was uploaded
+    const img = req.uploadedFile ? req.uploadedFile.secure_url : req.body.img;
+    
     const deck = await Deck.create({
       title,
       description,
       img,
       tags,
-      cards: cards || [],
+      cards,
       owner: req.user.userId
     });
     
@@ -103,15 +122,19 @@ exports.createDeck = async (req, res) => {
 // Update deck (with owner verification)
 exports.updateDeck = async (req, res) => {
   try {
-    const { title, description, img, cards, tags } = req.body;
+    const { title, description } = req.body;
     const updateData = {};
     
-    if (title !== undefined) updateData.title = title;
-    if (description !== undefined) updateData.description = description;
-    if (img !== undefined) updateData.img = img;
-    if (tags !== undefined) updateData.tags = tags;
+    // Handle arrays from form data
+    let cards = req.body.cards;
+    let tags = req.body.tags;
     
+    // Process cards array if provided
     if (cards !== undefined) {
+      if (!Array.isArray(cards)) {
+        cards = [cards].filter(Boolean);
+      }
+      
       if (cards.length > 0) {
         const validCardIds = cards.every(id => ObjectId.isValid(id));
         if (!validCardIds) {
@@ -129,6 +152,33 @@ exports.updateDeck = async (req, res) => {
       updateData.cards = cards;
     }
     
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    
+    // Use image URL from Cloudinary if an image was uploaded
+    if (req.uploadedFile) {
+      updateData.img = req.uploadedFile.secure_url;
+    } else if (req.body.img !== undefined) {
+      updateData.img = req.body.img;
+    }
+    
+    // Process tags array if provided
+    if (tags !== undefined) {
+      if (!Array.isArray(tags)) {
+        tags = [tags].filter(Boolean);
+      }
+      
+      if (tags.length > 0) {
+        const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
+        const invalidTags = tags.filter(tag => !validTags.includes(tag));
+        
+        if (invalidTags.length > 0) {
+          return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
+        }
+      }
+      updateData.tags = tags;
+    }
+    
     const deck = await Deck.findById(req.params.id);
     if (!deck) {
       return res.status(404).json(createResponse(false, 'Deck not found'));
@@ -140,15 +190,6 @@ exports.updateDeck = async (req, res) => {
     
     if (deck.owner !== req.user.userId) {
       return res.status(403).json(createResponse(false, 'Not authorized to update this deck'));
-    }
-
-    if (tags !== undefined) {
-      const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
-      const invalidTags = tags.filter(tag => !validTags.includes(tag));
-      
-      if (invalidTags.length > 0) {
-        return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
-      }
     }
     
     const updatedDeck = await Deck.findByIdAndUpdate(

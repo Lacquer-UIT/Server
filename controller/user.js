@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const env = require('dotenv').config();
 const response = require("../dto");
 const { OAuth2Client } = require('google-auth-library');
+const qrCode = require('qrcode');
 
 
 
@@ -131,6 +132,21 @@ exports.getUserProfile = async (req, res) => {
       return res.status(404).json(response(false, "User not found"));
     }
     res.json(response(true, "User Found!", user));
+  } catch (error) {
+    res.status(500).json(response(false, error.message));
+  }
+};
+
+exports.getQRCode = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json(response(false, "User not found"));
+    }
+    console.log(user);
+    const qrcode = await qrCode.toDataURL(user._id.toString());
+    
+    res.json(response(true, "QR Code generated successfully", { qrcode }));
   } catch (error) {
     res.status(500).json(response(false, error.message));
   }

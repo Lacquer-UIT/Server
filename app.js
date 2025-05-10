@@ -18,6 +18,8 @@ var authRouter = require('./routes/auth');
 var redirectRouter = require('./routes/redirect');
 var deckRouter = require("./routes/deck");
 var classifyRouter = require("./routes/classify");
+var friendRouter = require("./routes/friend");
+var badgeRouter = require("./routes/badge");
 
 var app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +77,8 @@ app.use("/chatbot", chatbotRouter);
 app.use("/redirect", redirectRouter);
 app.use("/deck", deckRouter)
 app.use("/classify", classifyRouter);
+app.use("/friend", friendRouter);
+app.use("/badge", badgeRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

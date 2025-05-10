@@ -10,10 +10,25 @@ const path = require('path');
 // Use the upload middleware from middleware/upload.js
 const upload = require('../middleware/upload');
 
-// Initialize Google Vision client once for the entire module
-const visionClient = new ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS || path.join(__dirname, '..', 'tmp', process.env.GOOGLE_CREDENTIALS_FILE || 'google-credentials.json')
-});
+// Initialize Google Vision client with credentials from either environment variable or file
+let visionClient;
+try {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    // Use credentials from environment variable string
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    visionClient = new ImageAnnotatorClient({ credentials });
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // Use credentials from file path
+    visionClient = new ImageAnnotatorClient({
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+    });
+  } else {
+    throw new Error('No Google Cloud credentials found');
+  }
+} catch (error) {
+  console.error('Error initializing Google Vision client:', error);
+  throw error;
+}
 
 router.post('/landmark', authMiddleware, upload.single('image'), async (req, res) => {
   try {

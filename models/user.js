@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema(
     // Email verification
     isVerified: { type: Boolean, default: function () { return this.authProvider !== "local"; } }, 
     verificationToken: { type: String, default: null },
+    badges: [{ type: mongoose.Schema.Types.ObjectId, ref: "Badge" }],
+    friendships: [{ type: mongoose.Schema.Types.ObjectId, ref: "Friendship" }]
   },
   { timestamps: true }
 );

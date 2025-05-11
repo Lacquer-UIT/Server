@@ -94,4 +94,25 @@ router.delete("/", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json(response(false, "Missing userId"));
+  }
+
+  try {
+    const chatbothistory = await Chatbothistory.findOne({ userId });
+
+    if (!chatbothistory || chatbothistory.history.length === 0) {
+      return res.status(404).json(response(false, "No conversation history found"));
+    }
+
+    res.json(response(true, "Conversation history fetched", chatbothistory.history));
+  } catch (error) {
+    console.error("Error fetching chatbot history:", error);
+    res.status(500).json(response(false, "Internal server error"));
+  }
+});
+
 module.exports = router;

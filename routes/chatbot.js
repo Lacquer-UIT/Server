@@ -74,4 +74,24 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.delete("/", async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json(response(false, "Missing userId"));
+  }
+
+  try {
+    const result = await Chatbothistory.findOneAndDelete({ userId });
+    if (result) {
+      res.json(response(true, "Conversation history deleted"));
+    } else {
+      res.status(404).json(response(false, "Conversation not found"));
+    }
+  } catch (error) {
+    console.error("Error deleting chatbot history:", error);
+    res.status(500).json(response(false, "Internal server error"));
+  }
+});
+
 module.exports = router;

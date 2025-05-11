@@ -1,42 +1,61 @@
 const express = require("express");
 const response = require("../dto");
-const apiLimiter = require('../middleware/rateLimiter');
-
+const apiLimiter = require("../middleware/rateLimiter");
+const Chatbothistory = require("../models/chatbot");
 const router = express.Router();
 
 // Set up the Google Generative AI
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const chatbot = require("../models/chatbot");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
-const userprompt = "Respond in the same language as the user. If the user writes in Vietnamese, respond as a wise, knowledgeable elder named 'Ông Đồ' using the Huế accent. Respond in pure text and concise manner. ";
+const modelInstruction =
+  "You are a wise, knowledgeable elder named 'Ông Đồ'. Respond in pure text and concise manner. ";
 
 // Apply rate limiter to all routes in this router
 router.use(apiLimiter);
 
 router.post("/", async (req, res) => {
-  const prompt = req.body.prompt + userprompt;
+  const prompt = req.body.prompt;
   try {
     // Check if there's a conversation history
-    const history = req.body.history || [];
-    
-    // Create the chat session with history if provided
-    let result;
-    if (history.length > 0) {
-      const chat = model.startChat({
-        history: history
+    const userId = req.body.userId || null;
+
+    //Fetch the conversation history from the database
+    let chatbothistory = await Chatbothistory.findOne({ userId: userId });
+    if (!chatbothistory) {
+      chatbothistory = new Chatbothistory({
+        userId: userId,
+        history: [],
       });
-      result = await chat.sendMessage(prompt);
-    } else {
-      result = await model.generateContent(prompt);
+      await chatbothistory.save();
     }
-    
+
+    // Add the user's prompt to the conversation history
+    chatbothistory.history.push({
+      role: "user",
+      parts: [{ text: prompt }],
+    });
+
+    const result = await model.generateContent({
+      contents: chatbothistory.history,
+      systemInstruction: modelInstruction,
+    });
+
     console.log(result); // Log the entire response object
     if (
       result.response &&
       result.response.candidates &&
       result.response.candidates.length > 0
     ) {
-      res.json(response(true, "Query Accepted", result.response.candidates[0].content.parts[0].text));
+      const responseText = result.response.candidates[0].content.parts[0].text;
+      res.json(response(true, "Query Accepted", responseText));
+      // Save the conversation history to the database
+      chatbothistory.history.push({
+        role: "model",
+        parts: [{ text: responseText }],
+      });
+      await chatbothistory.save();
     } else {
       res.status(500).json(response(false, "AI Error"));
     }

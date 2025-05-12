@@ -64,18 +64,32 @@
             <svg class="w-12 h-12 text-red-600 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <h2 class="text-2xl font-bold" style="color: var(--primary-color);">Error</h2>
+            <h2 class="text-2xl font-bold" style="color: var(--primary-color);">
+              <% if (error.status === 404) { %>
+                Page Not Found
+              <% } else { %>
+                Error
+              <% } %>
+            </h2>
           </div>
           
           <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-2"><%=message%></h3>
-            <p class="text-gray-700 mb-4">Status: <%=error.status%></p>
+            <% if (error.status === 404) { %>
+              <h3 class="text-xl font-semibold mb-2">The page you're looking for doesn't exist</h3>
+              <p class="text-gray-700 mb-4">Status: 404 - Not Found</p>
+              <p class="text-gray-600">The requested URL was not found on this server. You might have followed a broken link or entered the URL incorrectly.</p>
+            <% } else { %>
+              <h3 class="text-xl font-semibold mb-2"><%=message%></h3>
+              <p class="text-gray-700 mb-4">Status: <%=error.status%></p>
+            <% } %>
           </div>
           
+          <% if (error.status !== 404 && error.stack) { %>
           <div class="mb-6">
             <h4 class="font-semibold mb-2">Stack Trace:</h4>
             <div class="stack-trace"><%=error.stack%></div>
           </div>
+          <% } %>
           
           <div class="flex justify-between items-center">
             <a href="/" class="btn-primary px-6 py-2 rounded-lg font-semibold">Back to Home</a>

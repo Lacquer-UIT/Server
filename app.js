@@ -7,6 +7,7 @@ var mongoose = require("mongoose");
 require("dotenv").config();
 const cors = require('cors');
 const { swaggerUi, swaggerSpec } = require('./swagger');
+const createResponse = require('./dto');
 
 
 
@@ -99,19 +100,18 @@ app.use(function (err, req, res, next) {
   // set status code
   const statusCode = err.status || 500;
   
-  // check if the request accepts HTML (browser request)
-  if (req.accepts('html')) {
-    // render the error page for browsers
+  // Get the Accept header value
+  const acceptHeader = req.get('Accept') || '';
+  
+  // Check if this is a browser request (explicitly wants HTML)
+  // or an API request that specifically accepts JSON
+  if (acceptHeader.includes('text/html') && !acceptHeader.includes('application/json')) {
+    // Render HTML error page for browser requests
     res.status(statusCode);
     res.render("error");
   } else {
-    // return JSON error for API requests
-    res.status(statusCode).json({
-      success: false,
-      message: err.message,
-      error: req.app.get("env") === "development" ? err : {},
-      status: statusCode
-    });
+    // Return JSON for API requests and when Accept header is ambiguous
+    res.status(statusCode).json(createResponse(false, err.message, null));
   }
 });
 

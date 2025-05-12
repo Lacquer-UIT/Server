@@ -56,10 +56,14 @@ exports.createDeck = async (req, res) => {
   try {
     const { title, description } = req.body;
     console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+    console.log('Uploaded file:', req.uploadedFile);
     
     // Handle arrays from form data
     let cards = req.body.cards || [];
     let tagNames = req.body.tags || [];
+    console.log('Cards:', cards);
+    console.log('Tag names:', tagNames);
     
     // Convert to array if needed
     if (!Array.isArray(cards)) {
@@ -110,12 +114,12 @@ exports.createDeck = async (req, res) => {
     }
     
     // Use image URL from Cloudinary if an image was uploaded
-    const img = req.uploadedFile ? req.uploadedFile.secure_url : req.body.img;
+    const image = req.uploadedFile ? req.uploadedFile.secure_url : req.body.image;
     
     const deck = await Deck.create({
       title,
       description,
-      img,
+      image,
       tags,
       cards,
       owner: req.user.userId

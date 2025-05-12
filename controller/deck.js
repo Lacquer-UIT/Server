@@ -1,5 +1,6 @@
 const Deck = require('../models/deck');
 const Dictionary = require('../models/wordModel');
+const Tag = require('../models/tag');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const createResponse = require("../dto");
@@ -17,6 +18,7 @@ exports.getAllDecks = async (req, res) => {
         path: 'cards',
         select: 'word pronunciations meanings.part_of_speech.type'
       })
+      .populate('tags', 'name description')
       .sort({ createdAt: -1 });
     
     res.status(200).json(createResponse(true, 'Decks retrieved successfully', { count: decks.length, data: decks }));
@@ -32,7 +34,8 @@ exports.getDeckById = async (req, res) => {
       .populate({
         path: 'cards',
         select: 'word pronunciations meanings img'
-      });
+      })
+      .populate('tags', 'name description');
     
     if (!deck) {
       return res.status(404).json(createResponse(false, 'Deck not found'));
@@ -56,18 +59,18 @@ exports.createDeck = async (req, res) => {
     
     // Handle arrays from form data
     let cards = req.body.cards || [];
-    let tags = req.body.tags || [];
+    let tagNames = req.body.tags || [];
     
     // Convert to array if needed
     if (!Array.isArray(cards)) {
       cards = [cards].filter(Boolean);
     }
     
-    if (!Array.isArray(tags)) {
-      tags = [tags].filter(Boolean);
+    if (!Array.isArray(tagNames)) {
+      tagNames = [tagNames].filter(Boolean);
     }
     
-    console.log('Processed deck data:', { title, description, tags, cards });
+    console.log('Processed deck data:', { title, description, tagNames, cards });
     
     if (!req.user || !req.user.userId) {
       return res.status(401).json(createResponse(false, 'Authentication required to create a deck'));
@@ -88,13 +91,22 @@ exports.createDeck = async (req, res) => {
       }
     }
 
-    if (tags && tags.length > 0) {
-      const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
-      const invalidTags = tags.filter(tag => !validTags.includes(tag));
+    // Process tags
+    let tags = [];
+    if (tagNames && tagNames.length > 0) {
+      // Get existing tags from database
+      const existingTags = await Tag.find({ name: { $in: tagNames } });
       
-      if (invalidTags.length > 0) {
-        return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
+      if (existingTags.length !== tagNames.length) {
+        // Find which tags don't exist
+        const existingTagNames = existingTags.map(tag => tag.name);
+        const nonExistingTags = tagNames.filter(tag => !existingTagNames.includes(tag));
+        
+        return res.status(400).json(createResponse(false, 
+          `Some tags don't exist: ${nonExistingTags.join(', ')}. Please create them first.`));
       }
+      
+      tags = existingTags.map(tag => tag._id);
     }
     
     // Use image URL from Cloudinary if an image was uploaded
@@ -109,7 +121,14 @@ exports.createDeck = async (req, res) => {
       owner: req.user.userId
     });
     
-    res.status(201).json(createResponse(true, 'Deck created successfully', deck));
+    const populatedDeck = await Deck.findById(deck._id)
+      .populate({
+        path: 'cards',
+        select: 'word pronunciations meanings.part_of_speech.type'
+      })
+      .populate('tags', 'name description');
+    
+    res.status(201).json(createResponse(true, 'Deck created successfully', populatedDeck));
   } catch (error) {
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(val => val.message);
@@ -127,7 +146,7 @@ exports.updateDeck = async (req, res) => {
     
     // Handle arrays from form data
     let cards = req.body.cards;
-    let tags = req.body.tags;
+    let tagNames = req.body.tags;
     
     // Process cards array if provided
     if (cards !== undefined) {
@@ -163,20 +182,28 @@ exports.updateDeck = async (req, res) => {
     }
     
     // Process tags array if provided
-    if (tags !== undefined) {
-      if (!Array.isArray(tags)) {
-        tags = [tags].filter(Boolean);
+    if (tagNames !== undefined) {
+      if (!Array.isArray(tagNames)) {
+        tagNames = [tagNames].filter(Boolean);
       }
       
-      if (tags.length > 0) {
-        const validTags = ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'];
-        const invalidTags = tags.filter(tag => !validTags.includes(tag));
+      if (tagNames.length > 0) {
+        // Get existing tags from database
+        const existingTags = await Tag.find({ name: { $in: tagNames } });
         
-        if (invalidTags.length > 0) {
-          return res.status(400).json(createResponse(false, `Invalid tags: ${invalidTags.join(', ')}`));
+        if (existingTags.length !== tagNames.length) {
+          // Find which tags don't exist
+          const existingTagNames = existingTags.map(tag => tag.name);
+          const nonExistingTags = tagNames.filter(tag => !existingTagNames.includes(tag));
+          
+          return res.status(400).json(createResponse(false, 
+            `Some tags don't exist: ${nonExistingTags.join(', ')}. Please create them first.`));
         }
+        
+        updateData.tags = existingTags.map(tag => tag._id);
+      } else {
+        updateData.tags = [];
       }
-      updateData.tags = tags;
     }
     
     const deck = await Deck.findById(req.params.id);
@@ -199,7 +226,7 @@ exports.updateDeck = async (req, res) => {
     ).populate({
       path: 'cards',
       select: 'word pronunciations meanings.part_of_speech.type'
-    });
+    }).populate('tags', 'name description');
     
     res.status(200).json(createResponse(true, 'Deck updated successfully', updatedDeck));
   } catch (error) {

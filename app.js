@@ -6,6 +6,8 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 require("dotenv").config();
 const cors = require('cors');
+const { swaggerUi, swaggerSpec } = require('./swagger');
+
 
 
 var indexRouter = require("./routes/index");
@@ -20,6 +22,7 @@ var deckRouter = require("./routes/deck");
 var classifyRouter = require("./routes/classify");
 var friendRouter = require("./routes/friend");
 var badgeRouter = require("./routes/badge");
+var tagRouter = require("./routes/tag");
 
 var app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +82,8 @@ app.use("/deck", deckRouter)
 app.use("/classify", classifyRouter);
 app.use("/friend", friendRouter);
 app.use("/badge", badgeRouter);
+app.use("/tag", tagRouter);
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

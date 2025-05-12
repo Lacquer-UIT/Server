@@ -16,10 +16,9 @@ const DeckSchema = new mongoose.Schema({
         type: String 
     },
     tags: [{
-        type: String,
-        enum: ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'],
-        default: []
-    }],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag'
+      }],
     cards: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Dictionary' 

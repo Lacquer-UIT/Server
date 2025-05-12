@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { upload, handleUpload } = require('../middleware/upload');
 
 const {
     registerUser,
@@ -31,7 +32,7 @@ router.post("/forgot", forgotPassword);
 router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile", authMiddleware, updateUserProfile);
 router.delete("/delete", authMiddleware, deleteUser);
-router.put("/avatar", authMiddleware, updateAvatar);
+router.put("/avatar", authMiddleware, upload.single('avatar'), handleUpload, updateAvatar);
 router.get("/qrcode", authMiddleware, getQRCode);
 
 // Google OAuth routes for mobile

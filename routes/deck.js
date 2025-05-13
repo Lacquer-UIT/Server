@@ -15,6 +15,9 @@ router.route('/tag/:tagId')
 router.route('/tag')
   .get(authMiddleware, deckController.getAllDecksSortedByTags);
 
+router.route('/notag')
+  .get(authMiddleware, deckController.getDecksWithoutTags);
+
 router.route('/:id')
   .get(deckController.getDeckById)
   .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)

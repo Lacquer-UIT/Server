@@ -375,15 +375,37 @@ exports.getDecksByTag = async (req, res) => {
   }
 };
 
+// Find decks that don't have any tags
+exports.getDecksWithoutTags = async (req, res) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json(createResponse(false, 'Authentication required'));
+    }
+    
+    const decks = await Deck.find({ 
+      owner: req.user.userId,
+      tags: { $size: 0 } 
+    })
+    .populate({
+      path: 'cards',
+      select: 'word pronunciations meanings.part_of_speech.type'
+    })
+    .sort({ createdAt: -1 });
+    
+    res.status(200).json(createResponse(true, 'Decks without tags retrieved successfully', { 
+      count: decks.length, 
+      data: decks 
+    }));
+  } catch (error) {
+    res.status(500).json(createResponse(false, error.message));
+  }
+};
+
 // Get all decks grouped and sorted by tags
 exports.getAllDecksSortedByTags = async (req, res) => {
   try {
     // Find all tags
     const tags = await Tag.find().sort({ name: 1 });
-    
-    if (tags.length === 0) {
-      return res.status(200).json(createResponse(true, 'No tags found', { count: 0, data: [] }));
-    }
     
     // Create result structure with tags and their associated decks
     const result = [];
@@ -407,6 +429,24 @@ exports.getAllDecksSortedByTags = async (req, res) => {
           decks: decks
         });
       }
+    }
+    
+    // Find decks that don't have any tags and add them to "Others" category
+    const decksWithoutTags = await Deck.find({ tags: { $size: 0 } })
+      .populate({
+        path: 'cards',
+        select: 'word pronunciations meanings.part_of_speech.type'
+      });
+    
+    if (decksWithoutTags.length > 0) {
+      result.push({
+        tag: {
+          _id: 'others',
+          name: 'Others',
+          description: 'Decks without tags'
+        },
+        decks: decksWithoutTags
+      });
     }
     
     res.status(200).json(createResponse(true, 'Decks grouped by tags retrieved successfully', { 

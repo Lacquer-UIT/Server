@@ -8,6 +8,8 @@ require("dotenv").config();
 const cors = require('cors');
 const { swaggerUi, swaggerSpec } = require('./swagger');
 const createResponse = require('./dto');
+const http = require('http');
+const { Server } = require('socket.io');
 
 
 
@@ -24,10 +26,22 @@ var classifyRouter = require("./routes/classify");
 var friendRouter = require("./routes/friend");
 var badgeRouter = require("./routes/badge");
 var tagRouter = require("./routes/tag");
+var chatRouter = require("./routes/chat");
 
 var app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+// Initialize socket.io connection handler
+require('./socket')(io);
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.use(cors({ origin: '*' })); // Allow all origins
@@ -84,7 +98,13 @@ app.use("/classify", classifyRouter);
 app.use("/friend", friendRouter);
 app.use("/badge", badgeRouter);
 app.use("/tag", tagRouter);
+app.use("/chat", chatRouter);
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// API documentation redirect 
+app.get("/chat-api", (req, res) => {
+  res.redirect("/api");
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

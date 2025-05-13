@@ -4,16 +4,18 @@ const createResponse = require('../dto');
 
 exports.requestFriendship = async (req, res) => {
     try {
-        const { userId } = req.user.userId;
+        const { userId } = req.user;
         const { friendId } = req.body;
 
         const user = await User.findById(userId);
         const friend = await User.findById(friendId);
-
-        if (!user || !friend) {
+        if (!friend) {
+            return res.status(404).json(createResponse(false, 'Friend not found'));
+        }
+        if (!user ) {
             return res.status(404).json(createResponse(false, 'User not found'));
         }   
-
+        
 
         // you blocked each other
         const blockedRequest = await Friendship.findOne({
@@ -96,7 +98,7 @@ exports.rejectFriendship = async (req, res) => {
 
 exports.getFriendRequests = async (req, res) => {
     try {
-        const { userId } = req.user.userId;
+        const { userId } = req.user;
 
         const user = await User.findById(userId);
         if (!user) {
@@ -113,7 +115,7 @@ exports.getFriendRequests = async (req, res) => {
 
 exports.getFriends = async (req, res) => {
     try {
-        const { userId } = req.user.userId;
+        const { userId } = req.user;
 
         const user = await User.findById(userId);
         if (!user) {
@@ -136,7 +138,7 @@ exports.getFriends = async (req, res) => {
 
 exports.blockFriend = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user;
         const friendId = req.body.friendId;
 
         const user = await User.findById(userId);
@@ -216,7 +218,7 @@ exports.unblockFriend = async (req, res) => {
 
 exports.getBlockedFriends = async (req, res) => {
     try {
-        const { userId } = req.user.userId;
+        const { userId } = req.user;
 
         const user = await User.findById(userId);
         if (!user) {

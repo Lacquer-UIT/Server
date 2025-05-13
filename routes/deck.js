@@ -9,6 +9,12 @@ router.route('/')
   .get(authMiddleware, deckController.getAllDecks)
   .post(authMiddleware, upload.single('image'), handleUpload, deckController.createDeck);
 
+router.route('/tag/:tagId')
+  .get(authMiddleware, deckController.getDecksByTag);
+
+router.route('/tag')
+  .get(authMiddleware, deckController.getAllDecksSortedByTags);
+
 router.route('/:id')
   .get(deckController.getDeckById)
   .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)

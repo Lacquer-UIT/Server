@@ -348,3 +348,73 @@ exports.removeCardFromDeck = async (req, res) => {
     res.status(500).json(createResponse(false, error.message));
   }
 };
+// Get decks by tag
+exports.getDecksByTag = async (req, res) => {
+  try {
+    const { tagId } = req.params;
+    
+    if (!ObjectId.isValid(tagId)) {
+      return res.status(400).json(createResponse(false, 'Invalid tag ID format'));
+    }
+    
+    const decks = await Deck.find({ tags: tagId })
+      .populate('tags', 'name description')
+      .populate({
+        path: 'cards',
+        select: 'word pronunciations meanings.part_of_speech.type'
+      })
+      .sort({ createdAt: -1 });
+    
+    if (decks.length === 0) {
+      return res.status(200).json(createResponse(true, 'No decks found with this tag', { count: 0, data: [] }));
+    }
+    
+    res.status(200).json(createResponse(true, 'Decks retrieved successfully', { count: decks.length, data: decks }));
+  } catch (error) {
+    res.status(500).json(createResponse(false, error.message));
+  }
+};
+
+// Get all decks grouped and sorted by tags
+exports.getAllDecksSortedByTags = async (req, res) => {
+  try {
+    // Find all tags
+    const tags = await Tag.find().sort({ name: 1 });
+    
+    if (tags.length === 0) {
+      return res.status(200).json(createResponse(true, 'No tags found', { count: 0, data: [] }));
+    }
+    
+    // Create result structure with tags and their associated decks
+    const result = [];
+    
+    // For each tag, find all decks that have this tag
+    for (const tag of tags) {
+      const decks = await Deck.find({ tags: tag._id })
+        .populate({
+          path: 'cards',
+          select: 'word pronunciations meanings.part_of_speech.type'
+        });
+      
+      // Only add tags that have at least one deck
+      if (decks.length > 0) {
+        result.push({
+          tag: {
+            _id: tag._id,
+            name: tag.name,
+            description: tag.description
+          },
+          decks: decks
+        });
+      }
+    }
+    
+    res.status(200).json(createResponse(true, 'Decks grouped by tags retrieved successfully', { 
+      count: result.length, 
+      data: result 
+    }));
+  } catch (error) {
+    res.status(500).json(createResponse(false, error.message));
+  }
+};
+

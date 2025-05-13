@@ -7,7 +7,6 @@ const TagSchema = new mongoose.Schema({
     unique: true, // no duplicate tags
     lowercase: true,
     trim: true,
-    enum: ['travel', 'technology', 'health', 'idioms', 'slang', 'food', 'tech', 'culture', 'history'] // optional constraint
   },
   description: {
     type: String,

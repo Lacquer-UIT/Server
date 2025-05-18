@@ -17,7 +17,8 @@ const {
     googleAuthCallback,
     sendTokenToClient,
     updateAvatar,
-    getQRCode
+    getQRCode,
+    updateAbout
   } = require("../controller/user");
   const authMiddleware = require("../middleware/auth");
 
@@ -34,6 +35,7 @@ router.put("/profile", authMiddleware, updateUserProfile);
 router.delete("/delete", authMiddleware, deleteUser);
 router.put("/avatar", authMiddleware, upload.single('avatar'), handleUpload, updateAvatar);
 router.get("/qrcode", authMiddleware, getQRCode);
+router.put("/about", authMiddleware, updateAbout);
 
 // Google OAuth routes for mobile
 router.post("/google", handleGoogleAuth);

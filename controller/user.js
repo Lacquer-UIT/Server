@@ -201,6 +201,18 @@ exports.updateAvatar = async (req, res) => {
     res.status(500).json(response(false, error.message));
   }
 };
+exports.updateAbout = async (req, res) => {
+  try {
+    const { about } = req.body;
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json(response(false, "User not found"));
+    user.about = about;
+    await user.save();
+    res.json(response(true, "About updated successfully", { about: user.about }));
+  } catch (error) {
+    res.status(500).json(response(false, error.message));
+  }
+};
 
 // Delete User Account
 exports.deleteUser = async (req, res) => {

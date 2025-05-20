@@ -119,7 +119,7 @@ exports.createDeck = async (req, res) => {
     const deck = await Deck.create({
       title,
       description,
-      image,
+      img: image,
       tags,
       cards,
       owner: req.user.userId

@@ -99,12 +99,12 @@ exports.createDeck = async (req, res) => {
     let tags = [];
     if (tagNames && tagNames.length > 0) {
       // Get existing tags from database
-      const existingTags = await Tag.find({ name: { $in: tagNames } });
+      const existingTags = await Tag.find({ _id: { $in: tagNames } });
       
       if (existingTags.length !== tagNames.length) {
         // Find which tags don't exist
-        const existingTagNames = existingTags.map(tag => tag.name);
-        const nonExistingTags = tagNames.filter(tag => !existingTagNames.includes(tag));
+        const existingTagIds = existingTags.map(tag => tag._id.toString());
+        const nonExistingTags = tagNames.filter(id => !existingTagIds.includes(id));
         
         return res.status(400).json(createResponse(false, 
           `Some tags don't exist: ${nonExistingTags.join(', ')}. Please create them first.`));
@@ -192,19 +192,20 @@ exports.updateDeck = async (req, res) => {
       }
       
       if (tagNames.length > 0) {
-        // Get existing tags from database
-        const existingTags = await Tag.find({ name: { $in: tagNames } });
-        
-        if (existingTags.length !== tagNames.length) {
-          // Find which tags don't exist
-          const existingTagNames = existingTags.map(tag => tag.name);
-          const nonExistingTags = tagNames.filter(tag => !existingTagNames.includes(tag));
-          
-          return res.status(400).json(createResponse(false, 
-            `Some tags don't exist: ${nonExistingTags.join(', ')}. Please create them first.`));
+        // Validate all tag IDs
+        const validTagIds = tagNames.every(id => ObjectId.isValid(id));
+        if (!validTagIds) {
+          return res.status(400).json(createResponse(false, 'Invalid tag ID format'));
         }
         
-        updateData.tags = existingTags.map(tag => tag._id);
+        // Check if all tags exist
+        const existingTags = await Tag.find({ _id: { $in: tagNames } });
+        
+        if (existingTags.length !== tagNames.length) {
+          return res.status(400).json(createResponse(false, 'One or more tags do not exist'));
+        }
+        
+        updateData.tags = tagNames;
       } else {
         updateData.tags = [];
       }

@@ -548,3 +548,28 @@
     animation: float 12s ease-in-out infinite reverse;
   }
   
+  .font-pacifico {
+    font-family: "Pacifico", cursive;
+    font-weight: 400;
+  }
+  
+  .lacquer-text {
+    font-family: "Albert Sans", sans-serif;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, hsl(0, 72%, 45%), hsl(47, 100%, 50%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 8px rgba(212, 38, 29, 0.3);
+    filter: drop-shadow(0 0 5px rgba(212, 38, 29, 0.3));
+  }
+  
+  .dark .lacquer-text {
+    background: linear-gradient(to right, hsl(0, 72%, 55%), hsl(47, 100%, 67%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+    filter: drop-shadow(0 0 8px rgba(255, 77, 77, 0.5));
+  }
+  

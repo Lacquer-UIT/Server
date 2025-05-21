@@ -3,6 +3,7 @@ const router = express.Router();
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { upload, handleUpload } = require('../middleware/upload');
+const verifyRecaptcha = require('../middleware/recaptcha');
 
 const {
     registerUser,
@@ -23,10 +24,10 @@ const {
   const authMiddleware = require("../middleware/auth");
 
 // Public routes
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register", verifyRecaptcha, registerUser);
+router.post("/login", verifyRecaptcha, loginUser);
 router.get("/verify", verifyEmail);
-router.post("/resend", resendVerificationEmail)
+router.post("/resend", verifyRecaptcha, resendVerificationEmail)
 router.post("/forgot", forgotPassword);
 
 // Protected routes (require JWT token)

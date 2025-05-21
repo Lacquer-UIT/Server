@@ -19,6 +19,14 @@ const verifyRecaptcha = async (req, res, next) => {
       return res.status(400).json(createResponse(false, 'reCAPTCHA token is required'));
     }
 
+    // Check if CAPTCHA_SECRET is set
+    if (!process.env.CAPTCHA_SECRET) {
+      console.error('CAPTCHA_SECRET environment variable is not set');
+      return res.status(500).json(createResponse(false, 'reCAPTCHA verification configuration error'));
+    }
+
+    console.log('Verifying reCAPTCHA token with Google API...');
+    
     // Verify the token with Google's reCAPTCHA API
     const verificationResponse = await axios.post(
       'https://www.google.com/recaptcha/api/siteverify',
@@ -31,16 +39,22 @@ const verifyRecaptcha = async (req, res, next) => {
       }
     );
 
+    console.log('reCAPTCHA verification response:', JSON.stringify(verificationResponse.data));
+
     // Check if verification was successful
     if (!verificationResponse.data.success) {
-      return res.status(400).json(createResponse(false, 'reCAPTCHA verification failed'));
+      const errorCodes = verificationResponse.data['error-codes'] || [];
+      return res.status(400).json(createResponse(
+        false, 
+        `reCAPTCHA verification failed: ${errorCodes.join(', ') || 'unknown error'}`
+      ));
     }
 
     // Continue with the request
     next();
   } catch (error) {
     console.error('reCAPTCHA verification error:', error);
-    res.status(500).json(createResponse(false, 'reCAPTCHA verification error'));
+    res.status(500).json(createResponse(false, `reCAPTCHA verification error: ${error.message}`));
   }
 };
 

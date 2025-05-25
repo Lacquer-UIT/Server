@@ -5,6 +5,11 @@ const authMiddleware = require('../middleware/auth'); // Updated to your actual 
 const { upload, handleUpload } = require('../middleware/upload');
 
 // Base routes for decks
+router.route('/:id')
+  .get(deckController.getDeckById)
+  .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
+  .delete(authMiddleware, deckController.deleteDeck);
+
 router.route('/')
   .get(authMiddleware, deckController.getAllDecks)
   .post(authMiddleware, upload.single('image'), handleUpload, deckController.createDeck);
@@ -17,11 +22,6 @@ router.route('/tag')
 
 router.route('/notag')
   .get(authMiddleware, deckController.getDecksWithoutTags);
-
-router.route('/:id')
-  .get(deckController.getDeckById)
-  .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
-  .delete(authMiddleware, deckController.deleteDeck);
 
 // Card management within decks
 router.route('/:id/cards')

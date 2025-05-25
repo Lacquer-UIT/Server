@@ -8,7 +8,7 @@ const axios = require('axios');
 // Get all posts (me and friends)
 const getAllPosts = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     // Get user's friends
     const friendships = await Friendship.find({
@@ -63,7 +63,7 @@ const getAllPosts = async (req, res) => {
 const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const currentUserId = req.user.id;
+    const currentUserId = req.user.userId;
     
     // Check if the requested user exists
     const targetUser = await User.findById(userId);
@@ -135,7 +135,7 @@ const getUserPosts = async (req, res) => {
 const createPost = async (req, res) => {
   try {
     const { imageUrl, caption, isPrivate, visibleToUsers } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     if (!imageUrl) {
       return res.status(400).json({
@@ -195,7 +195,7 @@ const createPost = async (req, res) => {
 const createPostWithUpload = async (req, res) => {
   try {
     const { caption, isPrivate, visibleToUsers } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     // Check if image was uploaded
     if (!req.uploadedFile) {
@@ -266,7 +266,7 @@ const createPostWithUpload = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId);
     
@@ -306,7 +306,7 @@ const makePostPrivate = async (req, res) => {
   try {
     const { postId } = req.params;
     const { visibleToUsers } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId);
     
@@ -368,7 +368,7 @@ const makePostPrivate = async (req, res) => {
 const makePostPublic = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId);
     
@@ -413,7 +413,7 @@ const sendReaction = async (req, res) => {
   try {
     const { postId } = req.params;
     const { emoji } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     if (!emoji) {
       return res.status(400).json({
@@ -485,7 +485,7 @@ const changeReaction = async (req, res) => {
   try {
     const { postId } = req.params;
     const { emoji } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     if (!emoji) {
       return res.status(400).json({
@@ -552,7 +552,7 @@ const changeReaction = async (req, res) => {
 const removeReaction = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId);
     
@@ -611,7 +611,7 @@ const removeReaction = async (req, res) => {
 const downloadImage = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId);
     
@@ -691,7 +691,7 @@ const checkPostVisibility = async (post, userId) => {
 const getPostById = async (req, res) => {
   try {
     const { postId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     const post = await Post.findById(postId)
       .populate('owner', 'username avatar email')

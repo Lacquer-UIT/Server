@@ -138,8 +138,8 @@ exports.getFriends = async (req, res) => {
 
 exports.blockFriend = async (req, res) => {
     try {
-        const userId = req.user;
-        const friendId = req.body.friendId;
+        const { userId } = req.user;
+        const { friendId } = req.body;
 
         const user = await User.findById(userId);
         if (!user) {
@@ -182,7 +182,7 @@ exports.blockFriend = async (req, res) => {
 exports.unblockFriend = async (req, res) => {
     try {
         const { friendId } = req.body;
-        const userId = req.user.userId;
+        const { userId } = req.user;
 
         const user = await User.findById(userId);
         if (!user) {

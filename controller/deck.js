@@ -358,7 +358,15 @@ exports.getDecksByTag = async (req, res) => {
       return res.status(400).json(createResponse(false, 'Invalid tag ID format'));
     }
     
-    const decks = await Deck.find({ tags: tagId })
+    // Check authentication
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json(createResponse(false, 'Authentication required'));
+    }
+    
+    const decks = await Deck.find({ 
+      tags: tagId,
+      owner: req.user.userId 
+    })
       .populate('tags', 'name description')
       .populate({
         path: 'cards',
@@ -405,19 +413,28 @@ exports.getDecksWithoutTags = async (req, res) => {
 // Get all decks grouped and sorted by tags
 exports.getAllDecksSortedByTags = async (req, res) => {
   try {
+    // Check authentication
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json(createResponse(false, 'Authentication required'));
+    }
+    
     // Find all tags
     const tags = await Tag.find().sort({ name: 1 });
     
     // Create result structure with tags and their associated decks
     const result = [];
     
-    // For each tag, find all decks that have this tag
+    // For each tag, find all decks that have this tag and belong to the current user
     for (const tag of tags) {
-      const decks = await Deck.find({ tags: tag._id })
+      const decks = await Deck.find({ 
+        tags: tag._id,
+        owner: req.user.userId 
+      })
         .populate({
           path: 'cards',
           select: 'word pronunciations meanings.part_of_speech.type'
-        });
+        })
+        .populate('tags', 'name description');
       
       // Only add tags that have at least one deck
       if (decks.length > 0) {
@@ -432,12 +449,16 @@ exports.getAllDecksSortedByTags = async (req, res) => {
       }
     }
     
-    // Find decks that don't have any tags and add them to "Others" category
-    const decksWithoutTags = await Deck.find({ tags: { $size: 0 } })
+    // Find decks that don't have any tags and belong to the current user
+    const decksWithoutTags = await Deck.find({ 
+      tags: { $size: 0 },
+      owner: req.user.userId
+    })
       .populate({
         path: 'cards',
         select: 'word pronunciations meanings.part_of_speech.type'
-      });
+      })
+      .populate('tags', 'name description');
     
     if (decksWithoutTags.length > 0) {
       result.push({

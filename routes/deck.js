@@ -4,16 +4,7 @@ const deckController = require('../controller/deck');
 const authMiddleware = require('../middleware/auth'); // Updated to your actual middleware file
 const { upload, handleUpload } = require('../middleware/upload');
 
-// Base routes for decks
-router.route('/:id')
-  .get(deckController.getDeckById)
-  .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
-  .delete(authMiddleware, deckController.deleteDeck);
-
-router.route('/')
-  .get(authMiddleware, deckController.getAllDecks)
-  .post(authMiddleware, upload.single('image'), handleUpload, deckController.createDeck);
-
+// More specific routes first to prevent conflicts
 router.route('/tag/:tagId')
   .get(authMiddleware, deckController.getDecksByTag);
 
@@ -22,6 +13,17 @@ router.route('/tag')
 
 router.route('/notag')
   .get(authMiddleware, deckController.getDecksWithoutTags);
+
+// Base routes for decks
+router.route('/')
+  .get(authMiddleware, deckController.getAllDecks)
+  .post(authMiddleware, upload.single('image'), handleUpload, deckController.createDeck);
+
+// Generic /:id route should come after specific routes
+router.route('/:id')
+  .get(deckController.getDeckById)
+  .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
+  .delete(authMiddleware, deckController.deleteDeck);
 
 // Card management within decks
 router.route('/:id/cards')

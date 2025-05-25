@@ -27,6 +27,7 @@ var friendRouter = require("./routes/friend");
 var badgeRouter = require("./routes/badge");
 var tagRouter = require("./routes/tag");
 var chatRouter = require("./routes/chat");
+var postRouter = require("./routes/post");
 
 var app = express();
 const server = http.createServer(app);
@@ -99,6 +100,7 @@ app.use("/friend", friendRouter);
 app.use("/badge", badgeRouter);
 app.use("/tag", tagRouter);
 app.use("/chat", chatRouter);
+app.use("/post", postRouter);
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // API documentation redirect 

@@ -16,7 +16,16 @@ exports.getAllDecks = async (req, res) => {
     const decks = await Deck.find({ owner: req.user.userId })
       .populate({
         path: 'cards',
-        select: 'word pronunciations meanings.part_of_speech.type'
+        select: 'word pronunciation wordTypes',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
       })
       .populate('tags', 'name description')
       .sort({ createdAt: -1 });
@@ -128,7 +137,16 @@ exports.createDeck = async (req, res) => {
     const populatedDeck = await Deck.findById(deck._id)
       .populate({
         path: 'cards',
-        select: 'word pronunciations meanings.part_of_speech.type'
+        select: 'word pronunciation',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
       })
       .populate('tags', 'name description');
     
@@ -230,7 +248,16 @@ exports.updateDeck = async (req, res) => {
       { new: true, runValidators: true }
     ).populate({
       path: 'cards',
-      select: 'word pronunciations meanings.part_of_speech.type'
+      select: 'word pronunciation',
+      transform: doc => ({
+        _id: doc._id,
+        word: doc.word,
+        pronunciation: doc.pronunciation,
+        meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+          type: doc.wordTypes[0].type,
+          definition: doc.wordTypes[0].definitions[0]
+        } : null
+      })
     }).populate('tags', 'name description');
     
     res.status(200).json(createResponse(true, 'Deck updated successfully', updatedDeck));
@@ -300,7 +327,16 @@ exports.addCardToDeck = async (req, res) => {
     
     const updatedDeck = await Deck.findById(req.params.id).populate({
       path: 'cards',
-      select: 'word pronunciations meanings.part_of_speech.type'
+      select: 'word pronunciation',
+      transform: doc => ({
+        _id: doc._id,
+        word: doc.word,
+        pronunciation: doc.pronunciation,
+        meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+          type: doc.wordTypes[0].type,
+          definition: doc.wordTypes[0].definitions[0]
+        } : null
+      })
     });
     
     res.status(200).json(createResponse(true, 'Card added to deck successfully', updatedDeck));
@@ -341,7 +377,16 @@ exports.removeCardFromDeck = async (req, res) => {
     
     const updatedDeck = await Deck.findById(req.params.id).populate({
       path: 'cards',
-      select: 'word pronunciations meanings.part_of_speech.type'
+      select: 'word pronunciation',
+      transform: doc => ({
+        _id: doc._id,
+        word: doc.word,
+        pronunciation: doc.pronunciation,
+        meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+          type: doc.wordTypes[0].type,
+          definition: doc.wordTypes[0].definitions[0]
+        } : null
+      })
     });
     
     res.status(200).json(createResponse(true, 'Card removed from deck successfully', updatedDeck));
@@ -370,7 +415,16 @@ exports.getDecksByTag = async (req, res) => {
       .populate('tags', 'name description')
       .populate({
         path: 'cards',
-        select: 'word pronunciations meanings.part_of_speech.type'
+        select: 'word pronunciation',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
       })
       .sort({ createdAt: -1 });
     
@@ -397,7 +451,16 @@ exports.getDecksWithoutTags = async (req, res) => {
     })
     .populate({
       path: 'cards',
-      select: 'word pronunciations meanings.part_of_speech.type'
+      select: 'word pronunciation',
+      transform: doc => ({
+        _id: doc._id,
+        word: doc.word,
+        pronunciation: doc.pronunciation,
+        meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+          type: doc.wordTypes[0].type,
+          definition: doc.wordTypes[0].definitions[0]
+        } : null
+      })
     })
     .sort({ createdAt: -1 });
     
@@ -432,7 +495,16 @@ exports.getAllDecksSortedByTags = async (req, res) => {
       })
         .populate({
           path: 'cards',
-          select: 'word pronunciations meanings.part_of_speech.type'
+          select: 'word pronunciation',
+          transform: doc => ({
+            _id: doc._id,
+            word: doc.word,
+            pronunciation: doc.pronunciation,
+            meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+              type: doc.wordTypes[0].type,
+              definition: doc.wordTypes[0].definitions[0]
+            } : null
+          })
         })
         .populate('tags', 'name description');
       
@@ -456,7 +528,16 @@ exports.getAllDecksSortedByTags = async (req, res) => {
     })
       .populate({
         path: 'cards',
-        select: 'word pronunciations meanings.part_of_speech.type'
+        select: 'word pronunciation',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
       })
       .populate('tags', 'name description');
     

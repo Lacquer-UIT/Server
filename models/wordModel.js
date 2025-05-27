@@ -9,25 +9,24 @@ const ExampleSchema = new Schema({
 
 // Definition schema
 const DefinitionSchema = new Schema({
-  text: { type: String, required: true },
-  examples: { type: [ExampleSchema], default: [] },
+  text: { type: String, required: true }
 });
 
-// Meaning schema
-const MeaningSchema = new Schema({
-  part_of_speech: {
-    type: { type: String, required: true },
-  },
-  definitions: { type: [DefinitionSchema], required: true },
+// WordType schema (replacing the old MeaningSchema)
+const WordTypeSchema = new Schema({
+  type: { type: String, required: true },
+  definitions: { type: [String], required: true }
 });
 
 // Main dictionary schema
 const DictionaryEntrySchema = new Schema(
   {
     word: { type: String, required: true, index: true },
-    pronunciations: { type: [String], default: [] },
-    img:{type:[String], default: []},
-    meanings: { type: [MeaningSchema], required: true },
+    pronunciation: { type: String },  // Changed from pronunciations array to single string
+    img: { type: [String], default: [] },
+    wordTypes: { type: [WordTypeSchema], required: true },  // Changed from meanings to wordTypes
+    difficulty: { type: String },  // Added difficulty field
+    examples: { type: [ExampleSchema], default: [] },
   },
   { collection: "Eng-Vie" }
 );

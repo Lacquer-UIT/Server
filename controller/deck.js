@@ -42,7 +42,16 @@ exports.getDeckById = async (req, res) => {
     const deck = await Deck.findById(req.params.id)
       .populate({
         path: 'cards',
-        select: 'word pronunciations meanings img'
+        select: 'word pronunciation wordTypes',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
       })
       .populate('tags', 'name description');
     
@@ -248,7 +257,7 @@ exports.updateDeck = async (req, res) => {
       { new: true, runValidators: true }
     ).populate({
       path: 'cards',
-      select: 'word pronunciation',
+      select: 'word pronunciation wordTypes',
       transform: doc => ({
         _id: doc._id,
         word: doc.word,
@@ -325,19 +334,20 @@ exports.addCardToDeck = async (req, res) => {
     deck.cards.push(cardId);
     await deck.save();
     
-    const updatedDeck = await Deck.findById(req.params.id).populate({
-      path: 'cards',
-      select: 'word pronunciation',
-      transform: doc => ({
-        _id: doc._id,
-        word: doc.word,
-        pronunciation: doc.pronunciation,
-        meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
-          type: doc.wordTypes[0].type,
-          definition: doc.wordTypes[0].definitions[0]
-        } : null
-      })
-    });
+    const updatedDeck = await Deck.findById(req.params.id)
+      .populate({
+        path: 'cards',
+        select: 'word pronunciation wordTypes',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
+      });
     
     res.status(200).json(createResponse(true, 'Card added to deck successfully', updatedDeck));
   } catch (error) {
@@ -377,7 +387,7 @@ exports.removeCardFromDeck = async (req, res) => {
     
     const updatedDeck = await Deck.findById(req.params.id).populate({
       path: 'cards',
-      select: 'word pronunciation',
+      select: 'word pronunciation wordTypes',
       transform: doc => ({
         _id: doc._id,
         word: doc.word,
@@ -394,6 +404,7 @@ exports.removeCardFromDeck = async (req, res) => {
     res.status(500).json(createResponse(false, error.message));
   }
 };
+
 // Get decks by tag
 exports.getDecksByTag = async (req, res) => {
   try {
@@ -415,7 +426,7 @@ exports.getDecksByTag = async (req, res) => {
       .populate('tags', 'name description')
       .populate({
         path: 'cards',
-        select: 'word pronunciation',
+        select: 'word pronunciation wordTypes',
         transform: doc => ({
           _id: doc._id,
           word: doc.word,
@@ -451,7 +462,7 @@ exports.getDecksWithoutTags = async (req, res) => {
     })
     .populate({
       path: 'cards',
-      select: 'word pronunciation',
+      select: 'word pronunciation wordTypes',
       transform: doc => ({
         _id: doc._id,
         word: doc.word,
@@ -495,7 +506,7 @@ exports.getAllDecksSortedByTags = async (req, res) => {
       })
         .populate({
           path: 'cards',
-          select: 'word pronunciation',
+          select: 'word pronunciation wordTypes',
           transform: doc => ({
             _id: doc._id,
             word: doc.word,
@@ -528,7 +539,7 @@ exports.getAllDecksSortedByTags = async (req, res) => {
     })
       .populate({
         path: 'cards',
-        select: 'word pronunciation',
+        select: 'word pronunciation wordTypes',
         transform: doc => ({
           _id: doc._id,
           word: doc.word,

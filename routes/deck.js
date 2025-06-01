@@ -23,7 +23,7 @@ router.route('/')
 router.route('/:id')
   .get(deckController.getDeckById)
   .put(authMiddleware, upload.single('image'), handleUpload, deckController.updateDeck)
-  .delete(authMiddleware, deckController.deleteDeck);
+  .delete(authMiddleware, deckController.deleteDeck)
 
 // Card management within decks
 router.route('/:id/cards')
@@ -31,5 +31,8 @@ router.route('/:id/cards')
 
 router.route('/:id/cards/:cardId')
   .delete(authMiddleware, deckController.removeCardFromDeck);
+
+router.route('/:id/finish')
+  .put(authMiddleware, deckController.finishDeck);
 
 module.exports = router;

@@ -15,6 +15,10 @@ const DeckSchema = new mongoose.Schema({
     img: { 
         type: String 
     },
+    isDone:{
+        type: Boolean,
+        default: false
+    },
     tags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'

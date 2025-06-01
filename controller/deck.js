@@ -572,3 +572,17 @@ exports.getAllDecksSortedByTags = async (req, res) => {
   }
 };
 
+exports.finishDeck = async (req,res) =>{
+  try{
+    const {deckId} = req.params;
+    const deck = await Deck.findById(deckId);
+    if(!deck){
+      return res.status(404).json(createResponse(false, 'Deck not found'));
+    }
+    deck.isDone = !deck.isDone;
+    await deck.save();
+    res.status(200).json(createResponse(true, 'Deck finished successfully', deck));
+  }catch(error){
+    res.status(500).json(createResponse(false, error.message));
+  }
+}

@@ -574,8 +574,8 @@ exports.getAllDecksSortedByTags = async (req, res) => {
 
 exports.finishDeck = async (req,res) =>{
   try{
-    const {deckId} = req.params;
-    const deck = await Deck.findById(deckId);
+    const {id} = req.params;
+    const deck = await Deck.findById(id);
     if(!deck){
       return res.status(404).json(createResponse(false, 'Deck not found'));
     }

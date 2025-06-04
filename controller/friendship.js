@@ -105,7 +105,9 @@ exports.getFriendRequests = async (req, res) => {
             return res.status(404).json(createResponse(false, 'User not found'));
         }
 
-        const friendRequests = await Friendship.find({ recipient: userId, status: 'pending' });
+        const friendRequests = await Friendship.find({ recipient: userId, status: 'pending' })
+            .populate('requester', 'username email avatar')
+            .populate('recipient', 'username email avatar');
 
         res.status(200).json(createResponse(true, 'Friend requests retrieved successfully', friendRequests));
     } catch (error) {
@@ -127,7 +129,9 @@ exports.getFriends = async (req, res) => {
                 { requester: userId, status: 'accepted' },
                 { recipient: userId, status: 'accepted' }
             ]
-        });
+        })
+        .populate('requester', 'username email avatar')
+        .populate('recipient', 'username email avatar');
 
         res.status(200).json(createResponse(true, 'Friends retrieved successfully', friends));
     } catch (error) {
@@ -228,7 +232,9 @@ exports.getBlockedFriends = async (req, res) => {
         const blockedFriends = await Friendship.find({
             blocker: userId,
             status: 'blocked'
-        });
+        })
+        .populate('requester', 'username email avatar')
+        .populate('recipient', 'username email avatar');
 
         res.status(200).json(createResponse(true, 'Blocked friends retrieved successfully', blockedFriends));
     } catch (error) {

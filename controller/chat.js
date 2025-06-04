@@ -9,12 +9,23 @@ exports.createPrivateChat = async (req, res) => {
         const { userId } = req.user;
         const { friendId } = req.body;
 
+        console.log('🔹 Creating private chat - userId from token:', userId);
+        console.log('🔹 Creating private chat - friendId from body:', friendId);
+        console.log('🔹 Request body:', req.body);
+
         const user = await User.findById(userId);
         const friend = await User.findById(friendId);
-        if(!user || !friend) {
+        
+        console.log('🔹 User lookup result:', user ? 'Found' : 'Not found');
+        console.log('🔹 Friend lookup result:', friend ? 'Found' : 'Not found');
+        
+        if(!friend) {
+            return res.status(404).json(createResponse(false, 'Friend not found'));
+        }
+        if(!user ) {
             return res.status(404).json(createResponse(false, 'User not found'));
         }
-
+        
         const chat = await Chat.findOne({
             participants: { $all: [userId, friendId] }
         });
@@ -29,6 +40,7 @@ exports.createPrivateChat = async (req, res) => {
 
         res.status(201).json(createResponse(true, 'Private chat created successfully', newChat));
     } catch (error) {
+        console.error('❌ Error in createPrivateChat:', error);
         res.status(500).json(createResponse(false, error.message));
     }
 }
@@ -114,6 +126,40 @@ exports.getChats = async (req, res) => {
                         { $limit: 1 }
                     ],
                     as: 'latestMessage'
+                }
+            },
+            
+            // Lookup participant details
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'participants',
+                    foreignField: '_id',
+                    as: 'participantDetails'
+                }
+            },
+            
+            // Project participant details with required fields
+            {
+                $addFields: {
+                    participants: {
+                        $map: {
+                            input: '$participantDetails',
+                            as: 'participant',
+                            in: {
+                                _id: '$$participant._id',
+                                username: '$$participant.username',
+                                avatar: '$$participant.avatar'
+                            }
+                        }
+                    }
+                }
+            },
+            
+            // Remove the temporary participantDetails field
+            {
+                $project: {
+                    participantDetails: 0
                 }
             },
             

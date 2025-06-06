@@ -48,13 +48,13 @@ exports.createPrivateChat = async (req, res) => {
 exports.createGroupChat = async (req, res) => {
     try {
         const { userId } = req.user;
-        const { name, description, admin, avatar } = req.body;
-        const { participants } = req.body.participants;
+        const { name, description, admin, avatar, participants } = req.body;
 
         const user = await User.findById(userId);
         if(!user) {
             return res.status(404).json(createResponse(false, 'User not found'));
         }
+        
         // Validate participants array
         if (!participants || !Array.isArray(participants) || participants.length === 0) {
             return res.status(400).json(createResponse(false, 'Participants list is required and cannot be empty'));
@@ -104,7 +104,7 @@ exports.createGroupChat = async (req, res) => {
     } catch (error) {
         res.status(500).json(createResponse(false, error.message));
     }
-}
+} 
 
 exports.getChats = async (req, res) => {
     try {

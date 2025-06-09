@@ -48,7 +48,16 @@ exports.getBadgeById = async (req, res) => {
 
 exports.createBadge = async (req, res) => {
     try {
-        const { name, iconUrl } = req.body;
+        const { name } = req.body;
+        
+        // Check if an image was uploaded
+        if (!req.uploadedFile) {
+            return res.status(400).json(createResponse(false, 'Badge icon is required'));
+        }
+        
+        // Use the Cloudinary URL from the uploaded file
+        const iconUrl = req.uploadedFile.secure_url;
+        
         const badge = await Badge.create({ name, iconUrl });
 
         res.status(201).json(createResponse(true, 'Badge created successfully', badge));
@@ -60,8 +69,21 @@ exports.createBadge = async (req, res) => {
 exports.updateBadge = async (req, res) => {
     try {
         const { badgeId } = req.params;
-        const { name, iconUrl } = req.body;
-        const badge = await Badge.findByIdAndUpdate(badgeId, { name, iconUrl }, { new: true });
+        const { name } = req.body;
+        
+        const updateData = {};
+        
+        // Update name if provided
+        if (name !== undefined) {
+            updateData.name = name;
+        }
+        
+        // Update icon if a new image was uploaded
+        if (req.uploadedFile) {
+            updateData.iconUrl = req.uploadedFile.secure_url;
+        }
+        
+        const badge = await Badge.findByIdAndUpdate(badgeId, updateData, { new: true });
 
         if (!badge) {
             return res.status(404).json(createResponse(false, 'Badge not found'));

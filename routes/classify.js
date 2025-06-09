@@ -98,7 +98,7 @@ router.post('/landmark', authMiddleware, upload.single('image'), async (req, res
     //   return res.status(404).json(response(false, 'No landmarks found within 5km radius'));
     // }
     
-    return res.status(200).json(response(true, 'Landmarks detected successfully', landmarksWithinRadius));
+    return res.status(200).json(response(true, 'Landmarks detected successfully', landmarks));
     
   } catch (error) {
     console.error('Error detecting landmarks:', error);

@@ -1,6 +1,6 @@
 const express = require("express");
 const response = require("../dto");
-const apiLimiter = require("../middleware/rateLimiter");
+// const apiLimiter = require("../middleware/rateLimiter");
 const Chatbothistory = require("../models/chatbot");
 const router = express.Router();
 
@@ -28,7 +28,7 @@ function cleanHistory(history) {
 }
 
 // Apply rate limiter
-router.use(apiLimiter);
+// router.use(apiLimiter);
 
 // POST /chatbot
 router.post("/", async (req, res) => {

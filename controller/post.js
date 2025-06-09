@@ -44,10 +44,13 @@ const getAllPosts = async (req, res) => {
     .populate('visibleTo', 'username')
     .sort({ createdAt: -1 });
     
+    // Process all posts to include emoji counts
+    const processedPosts = posts.map(post => processReactionsWithEmojiCounts(post));
+    
     res.status(200).json({
       success: true,
-      data: posts,
-      count: posts.length
+      data: processedPosts,
+      count: processedPosts.length
     });
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -111,10 +114,13 @@ const getUserPosts = async (req, res) => {
       .populate('visibleTo', 'username')
       .sort({ createdAt: -1 });
     
+    // Process all posts to include emoji counts
+    const processedPosts = posts.map(post => processReactionsWithEmojiCounts(post));
+    
     res.status(200).json({
       success: true,
-      data: posts,
-      count: posts.length,
+      data: processedPosts,
+      count: processedPosts.length,
       user: {
         id: targetUser._id,
         username: targetUser.username,
@@ -465,10 +471,13 @@ const sendReaction = async (req, res) => {
       .populate('reactions.user', 'username avatar')
       .populate('visibleTo', 'username avatar');
     
+    // Process post to include emoji counts
+    const processedPost = processReactionsWithEmojiCounts(updatedPost);
+    
     res.status(200).json({
       success: true,
       message: 'Reaction added successfully',
-      data: updatedPost
+      data: processedPost
     });
   } catch (error) {
     console.error('Error sending reaction:', error);
@@ -533,10 +542,13 @@ const changeReaction = async (req, res) => {
       .populate('reactions.user', 'username avatar')
       .populate('visibleTo', 'username avatar');
     
+    // Process post to include emoji counts
+    const processedPost = processReactionsWithEmojiCounts(updatedPost);
+    
     res.status(200).json({
       success: true,
       message: 'Reaction updated successfully',
-      data: updatedPost
+      data: processedPost
     });
   } catch (error) {
     console.error('Error changing reaction:', error);
@@ -592,10 +604,13 @@ const removeReaction = async (req, res) => {
       .populate('reactions.user', 'username avatar')
       .populate('visibleTo', 'username avatar');
     
+    // Process post to include emoji counts
+    const processedPost = processReactionsWithEmojiCounts(updatedPost);
+    
     res.status(200).json({
       success: true,
       message: 'Reaction removed successfully',
-      data: updatedPost
+      data: processedPost
     });
   } catch (error) {
     console.error('Error removing reaction:', error);
@@ -667,6 +682,27 @@ const downloadImage = async (req, res) => {
   }
 };
 
+// Helper function to process reactions and return emoji counts
+const processReactionsWithEmojiCounts = (post) => {
+  const postObj = post.toObject();
+  
+  // Create emoji counts
+  const emojiCounts = {};
+  postObj.reactions.forEach(reaction => {
+    if (emojiCounts[reaction.emoji]) {
+      emojiCounts[reaction.emoji]++;
+    } else {
+      emojiCounts[reaction.emoji] = 1;
+    }
+  });
+  
+  // Add emoji summary to post object
+  postObj.emojiCounts = emojiCounts;
+  postObj.totalReactions = postObj.reactions.length;
+  
+  return postObj;
+};
+
 // Helper function to check if user can see a post
 const checkPostVisibility = async (post, userId) => {
   // If post is public (empty visibleTo array), everyone can see it
@@ -714,9 +750,12 @@ const getPostById = async (req, res) => {
       });
     }
     
+    // Process post to include emoji counts
+    const processedPost = processReactionsWithEmojiCounts(post);
+    
     res.status(200).json({
       success: true,
-      data: post
+      data: processedPost
     });
   } catch (error) {
     console.error('Error fetching post:', error);

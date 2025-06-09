@@ -64,39 +64,39 @@ router.post('/landmark', authMiddleware, upload.single('image'), async (req, res
       return res.status(404).json(response(false, 'No landmarks detected with sufficient confidence'));
     }
 
-    // Check if any landmark is within 5km radius
-    const landmarksWithinRadius = [];
+    // // Check if any landmark is within 5km radius
+    // const landmarksWithinRadius = [];
     
-    for (const landmark of validLandmarks) {
-      if (landmark.locations && landmark.locations.length > 0) {
-        const landmarkLat = landmark.locations[0].latLng.latitude;
-        const landmarkLng = landmark.locations[0].latLng.longitude;
+    // for (const landmark of validLandmarks) {
+    //   if (landmark.locations && landmark.locations.length > 0) {
+    //     const landmarkLat = landmark.locations[0].latLng.latitude;
+    //     const landmarkLng = landmark.locations[0].latLng.longitude;
         
-        // Calculate distance using Haversine formula
-        const distance = calculateDistance(
-          parseFloat(latitude), 
-          parseFloat(longitude), 
-          landmarkLat, 
-          landmarkLng
-        );
+    //     // Calculate distance using Haversine formula
+    //     const distance = calculateDistance(
+    //       parseFloat(latitude), 
+    //       parseFloat(longitude), 
+    //       landmarkLat, 
+    //       landmarkLng
+    //     );
         
-        if (distance <= 5) { // 5km radius
-          landmarksWithinRadius.push({
-            name: landmark.description,
-            confidence: (landmark.score * 100).toFixed(2) + '%',
-            distance: distance.toFixed(2) + ' km',
-            location: {
-              latitude: landmarkLat,
-              longitude: landmarkLng
-            }
-          });
-        }
-      }
-    }
+    //     if (distance <= 5) { // 5km radius
+    //       landmarksWithinRadius.push({
+    //         name: landmark.description,
+    //         confidence: (landmark.score * 100).toFixed(2) + '%',
+    //         distance: distance.toFixed(2) + ' km',
+    //         location: {
+    //           latitude: landmarkLat,
+    //           longitude: landmarkLng
+    //         }
+    //       });
+    //     }
+    //   }
+    // }
     
-    if (landmarksWithinRadius.length === 0) {
-      return res.status(404).json(response(false, 'No landmarks found within 5km radius'));
-    }
+    // if (landmarksWithinRadius.length === 0) {
+    //   return res.status(404).json(response(false, 'No landmarks found within 5km radius'));
+    // }
     
     return res.status(200).json(response(true, 'Landmarks detected successfully', landmarksWithinRadius));
     

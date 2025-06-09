@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const createResponse = require("../dto");
 
-// Get current user's decks only
+// Get current user's decks and universal decks
 exports.getAllDecks = async (req, res) => {
   try {
     console.log(req.user)
@@ -13,7 +13,12 @@ exports.getAllDecks = async (req, res) => {
       return res.status(401).json(createResponse(false, 'Authentication required'));
     }
     
-    const decks = await Deck.find({ owner: req.user.userId })
+    const decks = await Deck.find({ 
+      $or: [
+        { owner: req.user.userId },
+        { owner: null }
+      ]
+    })
       .populate({
         path: 'cards',
         select: 'word pronunciation wordTypes',
@@ -36,7 +41,42 @@ exports.getAllDecks = async (req, res) => {
   }
 };
 
-// Get single deck by ID (with owner verification)
+// Get universal decks and decks from other users
+exports.getUniversalAndOtherUsersDecks = async (req, res) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json(createResponse(false, 'Authentication required'));
+    }
+    
+    const decks = await Deck.find({ 
+      $or: [
+        { owner: null },
+        { owner: { $ne: req.user.userId } }
+      ]
+    })
+      .populate({
+        path: 'cards',
+        select: 'word pronunciation wordTypes',
+        transform: doc => ({
+          _id: doc._id,
+          word: doc.word,
+          pronunciation: doc.pronunciation,
+          meaning: doc.wordTypes && doc.wordTypes.length > 0 ? {
+            type: doc.wordTypes[0].type,
+            definition: doc.wordTypes[0].definitions[0]
+          } : null
+        })
+      })
+      .populate('tags', 'name description')
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json(createResponse(true, 'Universal and other users decks retrieved successfully', { count: decks.length, data: decks }));
+  } catch (error) {
+    res.status(500).json(createResponse(false, error.message));
+  }
+};
+
+// Get single deck by ID (with owner verification for non-universal decks)
 exports.getDeckById = async (req, res) => {
   try {
     const deck = await Deck.findById(req.params.id)
@@ -59,7 +99,8 @@ exports.getDeckById = async (req, res) => {
       return res.status(404).json(createResponse(false, 'Deck not found'));
     }
     
-    if (req.user && req.user.userId && deck.owner !== req.user.userId) {
+    // Allow access to universal decks (owner is null) or if user owns the deck
+    if (deck.owner !== null && req.user && req.user.userId && deck.owner !== req.user.userId) {
       return res.status(403).json(createResponse(false, 'Not authorized to access this deck'));
     }
     
@@ -421,7 +462,10 @@ exports.getDecksByTag = async (req, res) => {
     
     const decks = await Deck.find({ 
       tags: tagId,
-      owner: req.user.userId 
+      $or: [
+        { owner: req.user.userId },
+        { owner: null }
+      ]
     })
       .populate('tags', 'name description')
       .populate({
@@ -457,7 +501,10 @@ exports.getDecksWithoutTags = async (req, res) => {
     }
     
     const decks = await Deck.find({ 
-      owner: req.user.userId,
+      $or: [
+        { owner: req.user.userId },
+        { owner: null }
+      ],
       tags: { $size: 0 } 
     })
     .populate({
@@ -498,11 +545,14 @@ exports.getAllDecksSortedByTags = async (req, res) => {
     // Create result structure with tags and their associated decks
     const result = [];
     
-    // For each tag, find all decks that have this tag and belong to the current user
+    // For each tag, find all decks that have this tag and belong to the current user or are universal
     for (const tag of tags) {
       const decks = await Deck.find({ 
         tags: tag._id,
-        owner: req.user.userId 
+        $or: [
+          { owner: req.user.userId },
+          { owner: null }
+        ]
       })
         .populate({
           path: 'cards',
@@ -532,10 +582,13 @@ exports.getAllDecksSortedByTags = async (req, res) => {
       }
     }
     
-    // Find decks that don't have any tags and belong to the current user
+    // Find decks that don't have any tags and belong to the current user or are universal
     const decksWithoutTags = await Deck.find({ 
       tags: { $size: 0 },
-      owner: req.user.userId
+      $or: [
+        { owner: req.user.userId },
+        { owner: null }
+      ]
     })
       .populate({
         path: 'cards',

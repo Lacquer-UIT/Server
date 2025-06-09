@@ -5,6 +5,9 @@ const authMiddleware = require('../middleware/auth'); // Updated to your actual 
 const { upload, handleUpload } = require('../middleware/upload');
 
 // More specific routes first to prevent conflicts
+router.route('/uni')
+  .get(authMiddleware, deckController.getUniversalAndOtherUsersDecks);
+
 router.route('/tag/:tagId')
   .get(authMiddleware, deckController.getDecksByTag);
 

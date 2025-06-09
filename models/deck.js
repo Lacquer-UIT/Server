@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const DeckSchema = new mongoose.Schema({
     owner: { 
         type: String,
-        required: true 
+        required: false 
     },
     title: { 
         type: String, 
